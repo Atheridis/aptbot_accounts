@@ -9,6 +9,7 @@ import sqlite3
 from importlib import reload
 import traceback
 import ttv_api.users
+import analyze_command
 
 reload(tools.raid)
 reload(tools.smart_privmsg)
@@ -21,10 +22,11 @@ COMMANDS_PATH = os.path.join(PATH, "commands")
 commands = [
     c for c in os.listdir(COMMANDS_PATH) if os.path.isfile(os.path.join(COMMANDS_PATH, c))
 ]
+commands = filter(lambda x: not x.startswith('.'), commands)
+commands = filter(lambda x: os.path.splitext(x)[1] == ".py", commands)
+commands = list(commands)
 specs = {}
 for command in commands:
-    if not command.split('.')[0]:
-        continue
     specs[command.split('.')[0]] = (
         importlib.util.spec_from_file_location(
             f"{command.split('.')[0]}",
@@ -50,24 +52,26 @@ def create_database():
     c = conn.cursor()
     try:
         c.execute("""CREATE TABLE commands (
-            command text PRIMARY KEY,
-            prefix text,
-            permission integer,
-            value text,
-            description text,
-            user_cooldown int,
-            global_cooldown int
+            command TEXT NOT NULL,
+            prefix TEXT NOT NULL,
+            permission INTEGER NOT NULL,
+            description TEXT,
+            user_cooldown INTEGER NOT NULL,
+            global_cooldown INTEGER NOT NULL,
+            last_used INTEGER NOT NULL,
+            PRIMARY KEY (command)
         )""")
     except sqlite3.OperationalError:
         print("Table commands exists")
 
     try:
         c.execute("""CREATE TABLE users (
-            user_id text PRIMARY KEY,
-            permission integer
+            user_id text NOT NULL,
+            permission INTEGER NOT NULL,
+            PRIMARY KEY (user_id)
         )""")
-    except sqlite3.OperationalError:
-        print("Table users exists")
+    except sqlite3.OperationalError as e:
+        print(f"Table users exists: {e}")
     else:
         aptbot_id = ttv_api.users.get_users(user_logins=["skgyorugo"])
         if aptbot_id:
@@ -76,12 +80,21 @@ def create_database():
 
     try:
         c.execute("""CREATE TABLE cooldowns (
-            user_id text,
-            command text,
-            prefix text,
-            user_cooldown integer,
-            global_cooldown integer,
+            user_id TEXT NOT NULL,
+            command TEXT NOT NULL,
+            user_cooldown INTEGER NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(user_id)
+            FOREIGN KEY(command) REFERENCES commands(command)
             PRIMARY KEY (user_id, command)
+        )""")
+    except sqlite3.OperationalError:
+        print("Table cooldowns exists")
+
+    try:
+        c.execute("""CREATE TABLE command_values (
+            command TEXT NOT NULL,
+            value TEXT NOT NULL,
+            FOREIGN KEY(command) REFERENCES commands(command)
         )""")
     except sqlite3.OperationalError:
         print("Table cooldowns exists")
@@ -101,6 +114,7 @@ def update_commands_in_database():
         command_description = modules[command_name].DESCRIPTION
         command_user_cooldown = modules[command_name].USER_COOLDOWN
         command_global_cooldown = modules[command_name].GLOBAL_COOLDOWN
+        command_last_used = 0
         # try:
         c.execute(
             "REPLACE INTO commands VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -108,10 +122,10 @@ def update_commands_in_database():
                 command_name,
                 command_prefix,
                 command_permission,
-                None,
                 command_description,
                 command_user_cooldown,
                 command_global_cooldown,
+                0,
             )
         )
     conn.commit()
@@ -124,64 +138,6 @@ update_commands_in_database()
 
 def main(bot: Bot, message: Message):
     if message.command == Commands.PRIVMSG:
-        conn = sqlite3.connect(os.path.join(PATH, "database.db"))
-        c = conn.cursor()
-        command = message.value.split(' ')[0]
-        prefix = command[0]
-        command = command[1:]
-        c.execute("SELECT * FROM commands WHERE command = ?", (command,))
-        fetched_command = c.fetchone()
-        user_perm = tools.permissions.get_permission_from_id(
-            message.tags["user-id"]
-        )
-        message_timestamp = int(message.tags["tmi-sent-ts"]) // 1000
-        if fetched_command and prefix == fetched_command[1] and user_perm <= fetched_command[2]:
-            c.execute(
-                "SELECT global_cooldown FROM cooldowns WHERE command = ? ORDER BY global_cooldown DESC",
-                (command, )
-            )
-            try:
-                fetched_global_cooldown = c.fetchone()[0]
-            except TypeError:
-                fetched_global_cooldown = 0
-            c.execute(
-                "SELECT user_cooldown FROM cooldowns WHERE user_id = ? AND command = ?",
-                (message.tags["user-id"], command)
-            )
-            try:
-                fetched_user_cooldown = c.fetchone()[0]
-            except TypeError:
-                fetched_user_cooldown = 0
-            cooldown = max(fetched_global_cooldown, fetched_user_cooldown)
-            if message_timestamp > cooldown:
-                c.execute(
-                    "SELECT user_cooldown, global_cooldown FROM commands WHERE command = ?",
-                    (command, )
-                )
-                user_cooldown, global_cooldown = c.fetchone()
-                c.execute(
-                    "REPLACE INTO cooldowns VALUES (?, ?, ?, ?, ?)",
-                    (
-                        message.tags["user-id"],
-                        command,
-                        prefix,
-                        user_cooldown + message_timestamp,
-                        global_cooldown + message_timestamp,
-                    )
-                )
-                conn.commit()
-                if not fetched_command[3]:
-                    modules[command].main(bot, message)
-                elif fetched_command[3]:
-                    tools.smart_privmsg.send(bot, message, fetched_command[3])
-            else:
-                bot.send_privmsg(
-                    message.channel,
-                    f"The command '{prefix}{command}' is on cooldown. \
-                    Please wait {int(cooldown - message_timestamp) + 1} seconds."
-                )
-
-        conn.commit()
-        conn.close()
+        analyze_command.do_command(bot, message, modules)
 
     tools.raid.raid(bot, message)

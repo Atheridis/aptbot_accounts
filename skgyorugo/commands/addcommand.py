@@ -11,8 +11,11 @@ GLOBAL_COOLDOWN = 0
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, "..")
 
+DEFAULT_PERMISSION = 99
+DEFAULT_DESCRIPTION = ""
 DEFAULT_USER_COOLDOWN = 5
 DEFAULT_GLOBAL_COOLDOWN = 0
+DEFAULT_LAST_USED = 0
 
 
 def main(bot: Bot, message: Message):
@@ -36,11 +39,11 @@ def main(bot: Bot, message: Message):
             (
                 command_name,
                 command_prefix,
-                99,
-                command_value,
-                "",
+                DEFAULT_PERMISSION,
+                DEFAULT_DESCRIPTION,
                 DEFAULT_USER_COOLDOWN,
                 DEFAULT_GLOBAL_COOLDOWN,
+                DEFAULT_LAST_USED,
             )
         )
     except sqlite3.IntegrityError:
@@ -54,6 +57,13 @@ def main(bot: Bot, message: Message):
             f"There was an error adding the command: {e}"
         )
     else:
+        c.execute(
+            "INSERT INTO command_values VALUES (?, ?)",
+            (
+                command_name,
+                command_value,
+            )
+        )
         bot.send_privmsg(
             message.channel,
             f"Successfully added {command_name}."
