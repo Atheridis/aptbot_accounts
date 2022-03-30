@@ -1,6 +1,3 @@
-import tools.raid
-import tools.smart_privmsg
-import tools.permissions
 from aptbot.bot import Bot, Message, Commands
 import os
 import importlib
@@ -9,11 +6,18 @@ import sqlite3
 from importlib import reload
 import traceback
 import ttv_api.users
+import tools.raid
+import tools.smart_privmsg
+import tools.permissions
 import analyze_command
+import scripts.unit_converter
+import yt_api.videos
 
 reload(tools.raid)
 reload(tools.smart_privmsg)
 reload(tools.permissions)
+reload(analyze_command)
+reload(scripts.unit_converter)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 COMMANDS_PATH = os.path.join(PATH, "commands")
@@ -51,25 +55,33 @@ def create_database():
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
     try:
-        c.execute("""CREATE TABLE commands (
-            command TEXT NOT NULL,
-            prefix TEXT NOT NULL,
-            permission INTEGER NOT NULL,
-            description TEXT,
-            user_cooldown INTEGER NOT NULL,
-            global_cooldown INTEGER NOT NULL,
-            last_used INTEGER NOT NULL,
-            PRIMARY KEY (command)
-        )""")
+        c.execute(
+            """
+            CREATE TABLE commands (
+                command TEXT NOT NULL,
+                prefix TEXT NOT NULL,
+                permission INTEGER NOT NULL,
+                description TEXT,
+                user_cooldown INTEGER NOT NULL,
+                global_cooldown INTEGER NOT NULL,
+                last_used INTEGER NOT NULL,
+                PRIMARY KEY (command)
+            )
+            """
+        )
     except sqlite3.OperationalError:
         print("Table commands exists")
 
     try:
-        c.execute("""CREATE TABLE users (
-            user_id text NOT NULL,
-            permission INTEGER NOT NULL,
-            PRIMARY KEY (user_id)
-        )""")
+        c.execute(
+            """
+            CREATE TABLE users (
+                user_id text NOT NULL,
+                permission INTEGER NOT NULL,
+                PRIMARY KEY (user_id)
+            )
+            """
+        )
     except sqlite3.OperationalError as e:
         print(f"Table users exists: {e}")
     else:
@@ -79,23 +91,31 @@ def create_database():
                       (aptbot_id[0].user_id, 0))
 
     try:
-        c.execute("""CREATE TABLE cooldowns (
-            user_id TEXT NOT NULL,
-            command TEXT NOT NULL,
-            user_cooldown INTEGER NOT NULL,
-            FOREIGN KEY(user_id) REFERENCES users(user_id)
-            FOREIGN KEY(command) REFERENCES commands(command)
-            PRIMARY KEY (user_id, command)
-        )""")
+        c.execute(
+            """
+            CREATE TABLE cooldowns (
+                user_id TEXT NOT NULL,
+                command TEXT NOT NULL,
+                user_cooldown INTEGER NOT NULL,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+                FOREIGN KEY(command) REFERENCES commands(command)
+                PRIMARY KEY (user_id, command)
+            )
+            """
+        )
     except sqlite3.OperationalError:
         print("Table cooldowns exists")
 
     try:
-        c.execute("""CREATE TABLE command_values (
-            command TEXT NOT NULL,
-            value TEXT NOT NULL,
-            FOREIGN KEY(command) REFERENCES commands(command)
-        )""")
+        c.execute(
+            """
+            CREATE TABLE command_values (
+                command TEXT NOT NULL,
+                value TEXT NOT NULL,
+                FOREIGN KEY(command) REFERENCES commands(command)
+            )
+            """
+        )
     except sqlite3.OperationalError:
         print("Table cooldowns exists")
 
@@ -139,5 +159,6 @@ update_commands_in_database()
 def main(bot: Bot, message: Message):
     if message.command == Commands.PRIVMSG:
         analyze_command.do_command(bot, message, modules)
+        scripts.unit_converter.send_metric(bot, message)
 
     tools.raid.raid(bot, message)
