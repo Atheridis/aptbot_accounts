@@ -55,6 +55,7 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
     fetched = c.fetchall()
     print(fetched)
     if not fetched:
+        conn.close()
         return
 
     (_, value,
@@ -68,6 +69,7 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
             f"The command '{prefix}{command}' is on cooldown. \
             Please wait {int(avail_time - message_timestamp) + 1} seconds."
         )
+        conn.close()
         return
 
     c.execute(
@@ -86,6 +88,7 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
         )
     )
     conn.commit()
+    conn.close()
     if value is None:
         command_modules[command].main(bot, message)
     else:

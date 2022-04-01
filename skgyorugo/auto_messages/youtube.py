@@ -1,11 +1,8 @@
 from aptbot.bot import Message, Commands, Bot
 import yt_api.videos
 
-PERMISSION = 99
-PREFIX = '?'
-DESCRIPTION = "Get my newest video! Just type ?video"
-USER_COOLDOWN = 15
-GLOBAL_COOLDOWN = 15
+COOLDOWN = 20 * 60
+END_TIME = 0
 
 CHANNEL_ID = "UCQ7C3NUKY6TSkURdUdVoYFw"
 

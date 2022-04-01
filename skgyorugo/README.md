@@ -18,6 +18,7 @@
 - [ ] specific word in message {message.0}, {message.1}, etc.
 - [ ] replied variable {reply.nick} {reply.message} {reply.message.0}
 - [ ] sub sellout bot
+- [ ] schedule
 
 ## Basic Commands
 - [ ] int
