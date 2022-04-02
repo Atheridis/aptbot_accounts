@@ -3,7 +3,11 @@ import os
 import sqlite3
 import time
 import tools.smart_privmsg
-from tools.smart_start_stream_time import start_stream_timestamp as stream_ts
+import tools.smart_start_stream_time
+from importlib import reload
+
+reload(tools.smart_privmsg)
+reload(tools.smart_start_stream_time)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -12,7 +16,7 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
 
-    start_stream_ts = stream_ts()
+    start_stream_ts = tools.smart_start_stream_time.start_stream_timestamp()
     if not start_stream_ts:
         return
 
@@ -54,4 +58,5 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
             )
         )
         conn.commit()
+        time.sleep(1.5)
     conn.close()

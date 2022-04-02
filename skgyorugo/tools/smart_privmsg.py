@@ -17,8 +17,6 @@ def _split_message(message: str) -> list[str]:
 
 
 def send(bot: Bot, message_data: Message, message: str):
-    # msg = ' '.join(message_data.value.split(' ')[1:])
-    # msg = split_message(msg)
     for msg in _split_message(' '.join(message_data.value.split(' ')[1:])):
         message = message.replace("{message}", msg)
         message = message.replace("{nick}", message_data.nick)

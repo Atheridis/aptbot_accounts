@@ -104,7 +104,7 @@ def create_database():
     try:
         c.execute(
             """
-            CREATE TABLE streamer_info (
+            CREATE TABLE stream_info (
                 start_stream_ts INTEGER NOT NULL,
                 last_checked INTEGER NOT NULL,
                 ended INTEGER NOT NULL,
@@ -156,14 +156,31 @@ def update_auto_messages_in_database(modules, auto_messages):
         auto_message_cooldown = modules[auto_message_name].COOLDOWN
         auto_message_end_time = modules[auto_message_name].END_TIME
         auto_message_last_used = 0
-        c.execute(
-            "REPLACE INTO commands VALUES (?, ?, ?, ?)",
-            (
-                auto_message_name,
-                auto_message_cooldown,
-                auto_message_end_time,
-                auto_message_last_used,
+        try:
+            c.execute(
+                "INSERT INTO auto_messages (name, cooldown, end_time, last_used) VALUES (?, ?, ?, ?)",
+                (
+                    auto_message_name,
+                    auto_message_cooldown,
+                    auto_message_end_time,
+                    auto_message_last_used,
+                )
             )
-        )
+        except Exception as e:
+            c.execute(
+                """
+                UPDATE auto_messages
+                SET
+                    cooldown = ?,
+                    end_time = ?
+                WHERE
+                    name = ?
+                """,
+                (
+                    auto_message_cooldown,
+                    auto_message_end_time,
+                    auto_message_name,
+                )
+            )
     conn.commit()
     conn.close()

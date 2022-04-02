@@ -9,6 +9,7 @@ import tools.permissions
 import analyze_command
 import scripts.unit_converter
 import database_manager
+import analyze_auto_message
 from importlib import reload
 
 reload(tools.raid)
@@ -17,14 +18,18 @@ reload(tools.permissions)
 reload(analyze_command)
 reload(scripts.unit_converter)
 reload(database_manager)
+reload(analyze_auto_message)
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 COMMANDS_PATH = os.path.join(PATH, "commands")
 AUTO_MESSAGES_PATH = os.path.join(PATH, "auto_messages")
 
-specs = {}
-modules = {}
+commands_specs = {}
+commands_modules = {}
+
+auto_message_specs = {}
+auto_message_modules = {}
 
 commands = [
     c for c in os.listdir(COMMANDS_PATH) if os.path.isfile(os.path.join(COMMANDS_PATH, c))
@@ -33,15 +38,16 @@ commands = filter(lambda x: not x.startswith('.'), commands)
 commands = filter(lambda x: os.path.splitext(x)[1] == ".py", commands)
 commands = list(commands)
 for command in commands:
-    specs[command.split('.')[0]] = (
+    commands_specs[command.split('.')[0]] = (
         importlib.util.spec_from_file_location(
             f"{command.split('.')[0]}",
             os.path.join(COMMANDS_PATH, command)
         )
     )
+print(f"my commands are {commands}")
 
 auto_messages = [
-    c for c in os.listdir(COMMANDS_PATH) if os.path.isfile(os.path.join(COMMANDS_PATH, c))
+    c for c in os.listdir(AUTO_MESSAGES_PATH) if os.path.isfile(os.path.join(AUTO_MESSAGES_PATH, c))
 ]
 auto_messages = filter(lambda x: not x.startswith('.'), auto_messages)
 auto_messages = filter(
@@ -50,19 +56,32 @@ auto_messages = filter(
 )
 auto_messages = list(auto_messages)
 for auto_message in auto_messages:
-    specs[auto_message.split('.')[0]] = (
+    auto_message_specs[auto_message.split('.')[0]] = (
         importlib.util.spec_from_file_location(
             f"{auto_message.split('.')[0]}",
-            os.path.join(COMMANDS_PATH, auto_message)
+            os.path.join(AUTO_MESSAGES_PATH, auto_message)
         )
     )
 
-for spec in specs:
-    modules[spec] = importlib.util.module_from_spec(specs[spec])
-    if not specs[spec]:
+for spec in commands_specs:
+    commands_modules[spec] = importlib.util.module_from_spec(
+        commands_specs[spec])
+    if not commands_specs[spec]:
         continue
     try:
-        specs[spec].loader.exec_module(modules[spec])
+        commands_specs[spec].loader.exec_module(commands_modules[spec])
+    except Exception as e:
+        print()
+        print(traceback.format_exc())
+        print(f"Problem Loading Module: {e}")
+
+for spec in auto_message_specs:
+    auto_message_modules[spec] = importlib.util.module_from_spec(
+        auto_message_specs[spec])
+    if not auto_message_specs[spec]:
+        continue
+    try:
+        auto_message_specs[spec].loader.exec_module(auto_message_modules[spec])
     except Exception as e:
         print()
         print(traceback.format_exc())
@@ -70,12 +89,16 @@ for spec in specs:
 
 
 database_manager.create_database()
-database_manager.update_commands_in_database(modules, commands)
+database_manager.update_commands_in_database(commands_modules, commands)
+database_manager.update_auto_messages_in_database(
+    auto_message_modules, auto_messages)
 
 
 def main(bot: Bot, message: Message):
     if message.command == Commands.PRIVMSG:
-        analyze_command.do_command(bot, message, modules)
+        analyze_command.do_command(bot, message, commands_modules)
         scripts.unit_converter.send_metric(bot, message)
+
+    analyze_auto_message.do_auto_message(bot, message, auto_message_modules)
 
     tools.raid.raid(bot, message)

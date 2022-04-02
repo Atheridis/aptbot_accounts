@@ -21,24 +21,34 @@ def start_stream_timestamp() -> Optional[int]:
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
 
-    c.execute(
-        """
-        SELECT
-            start_stream_ts,
-            last_checked,
-            ended
-        FROM
-            stream_info
-        WHERE
-            last_checked = (SELECT MAX(last_checked) FROM stream_info);
-            AND ended = 0
-        """
-    )
+    c.execute("SELECT MAX(last_checked) FROM stream_info")
+    max_last_checked = c.fetchone()
+    if max_last_checked:
+        c.execute(
+            """
+            SELECT
+                start_stream_ts,
+                last_checked,
+                ended
+            FROM
+                stream_info
+            WHERE
+                last_checked = ?
+                AND ended = 0
+            """,
+            (
+                max_last_checked[0],
+            )
+        )
+        print(f"I checked {max_last_checked}")
 
     fetched = c.fetchone()
     if fetched:
         start_stream_ts, last_checked, _ = fetched
-        if last_checked + CHECK_STREAMTIME_CD < time.time():
+        print(f"stream ts = {start_stream_ts}")
+        print(
+            f"last_checked {last_checked} + check_streamtime_cd {CHECK_STREAMTIME_CD} \n time.time {time.time()}")
+        if time.time() < last_checked + CHECK_STREAMTIME_CD:
             return start_stream_ts
 
     stream_info = ttv_api.stream.get_streams(user_logins=[streamer_login])
@@ -47,12 +57,12 @@ def start_stream_timestamp() -> Optional[int]:
 
     if not stream_info:
         start_stream_ts, last_checked, _ = fetched
-        if last_checked + MAX_OFF_STREAM_MARGIN < time.time():
+        if time.time() < last_checked + MAX_OFF_STREAM_MARGIN:
             conn.close()
             return
 
         c.execute(
-            "REPLACE INTO commands VALUES (?, ?, ?)",
+            "REPLACE INTO stream_info VALUES (?, ?, ?)",
             (
                 start_stream_ts,
                 last_checked,
@@ -65,8 +75,9 @@ def start_stream_timestamp() -> Optional[int]:
 
     if not fetched:
         start_stream_ts = int(stream_info[0].started_at.timestamp())
+        print("TEST")
         c.execute(
-            "REPLACE INTO commands VALUES (?, ?, ?)",
+            "REPLACE INTO stream_info VALUES (?, ?, ?)",
             (
                 start_stream_ts,
                 int(time.time()),
@@ -77,9 +88,10 @@ def start_stream_timestamp() -> Optional[int]:
         conn.close()
         return start_stream_ts
 
+    print("MORE TEST")
     start_stream_ts, last_checked, _ = fetched
     c.execute(
-        "REPLACE INTO commands VALUES (?, ?, ?)",
+        "REPLACE INTO stream_info VALUES (?, ?, ?)",
         (
             start_stream_ts,
             int(time.time()),

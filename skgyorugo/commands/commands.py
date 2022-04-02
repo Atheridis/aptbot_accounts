@@ -23,8 +23,6 @@ def main(bot: Bot, message: Message):
         message.tags["user-id"]
     )
 
-    print(f"user perm is: {user_perm}")
-
     c.execute(
         "SELECT prefix, command FROM commands WHERE permission >= ? ORDER BY permission ASC",
         (
@@ -33,8 +31,6 @@ def main(bot: Bot, message: Message):
     )
 
     fetched_commands = c.fetchall()
-
-    print(f"fetched commands is: {fetched_commands}")
 
     conn.commit()
     conn.close()

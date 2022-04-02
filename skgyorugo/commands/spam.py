@@ -7,9 +7,12 @@ DESCRIPTION = ""
 USER_COOLDOWN = 10
 GLOBAL_COOLDOWN = 0
 
+MAX_LENGTH = 469
+
 
 def main(bot: Bot, message: Message):
     msg = ' '.join(message.value.split(' ')[1:])
-    msg = (msg + ' ') * 10
-    tools.smart_privmsg.send(bot, message, msg)
-    # bot.send_privmsg(message.channel, msg)
+    new_msg = ""
+    while len(new_msg) + len(msg) > MAX_LENGTH:
+        new_msg += msg + " "
+    bot.send_privmsg(message.channel, msg)
