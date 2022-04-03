@@ -89,6 +89,7 @@ for spec in auto_message_specs:
 
 
 database_manager.create_database()
+database_manager.create_variables_db()
 database_manager.update_commands_in_database(commands_modules, commands)
 database_manager.update_auto_messages_in_database(
     auto_message_modules, auto_messages)

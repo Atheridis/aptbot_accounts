@@ -2,7 +2,7 @@ from aptbot.bot import Message, Commands, Bot
 import sqlite3
 import os
 
-PERMISSION = 1
+PERMISSION = 10
 PREFIX = '\\'
 DESCRIPTION = ""
 USER_COOLDOWN = 0

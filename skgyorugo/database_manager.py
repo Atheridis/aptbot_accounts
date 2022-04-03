@@ -4,6 +4,60 @@ import ttv_api.users
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 
+STREAMER_PATH = os.path.abspath(os.path.join(__file__, ".."))
+streamer_login = os.path.split(STREAMER_PATH)[1]
+
+
+def create_variables_db():
+    conn = sqlite3.connect(os.path.join(PATH, "variables.db"))
+    c = conn.cursor()
+
+    try:
+        c.execute(
+            """
+            CREATE TABLE variables (
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                value TEXT NOT NULL,
+                PRIMARY KEY (name)
+            )
+            """
+        )
+    except sqlite3.OperationalError as e:
+        print(e)
+
+    try:
+        c.execute(
+            """
+            CREATE TABLE methods (
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                input TEXT NOT NULL,
+                PRIMARY KEY (name, type)
+            )
+            """
+        )
+    except sqlite3.OperationalError as e:
+        print(e)
+
+    try:
+        c.execute(
+            """
+            CREATE TABLE list_values (
+                id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                value TEXT NOT NULL,
+                FOREIGN KEY(name) REFERENCES variables(name)
+                PRIMARY KEY (id, name)
+            )
+            """
+        )
+    except sqlite3.OperationalError as e:
+        print(e)
+
+    conn.close()
+
 
 def create_database():
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
@@ -23,8 +77,8 @@ def create_database():
             )
             """
         )
-    except sqlite3.OperationalError:
-        print("Table commands exists")
+    except sqlite3.OperationalError as e:
+        print(e)
 
     try:
         c.execute(
@@ -37,12 +91,22 @@ def create_database():
             """
         )
     except sqlite3.OperationalError as e:
-        print(f"Table users exists: {e}")
-    else:
-        admin_id = ttv_api.users.get_users(user_logins=["skgyorugo"])
-        if admin_id:
+        print(e)
+
+    admin_id = ttv_api.users.get_users(user_logins=["skgyorugo"])
+    broadcaster_id = ttv_api.users.get_users(user_logins=[streamer_login])
+    if admin_id:
+        try:
             c.execute("INSERT INTO users VALUES (?, ?)",
                       (admin_id[0].user_id, 0))
+        except sqlite3.IntegrityError as e:
+            print(e)
+    if broadcaster_id:
+        try:
+            c.execute("INSERT INTO users VALUES (?, ?)",
+                      (broadcaster_id[0].user_id, 1))
+        except sqlite3.IntegrityError as e:
+            print(e)
 
     try:
         c.execute(
@@ -57,8 +121,8 @@ def create_database():
             )
             """
         )
-    except sqlite3.OperationalError:
-        print("Table cooldowns exists")
+    except sqlite3.OperationalError as e:
+        print(e)
 
     try:
         c.execute(
@@ -70,8 +134,8 @@ def create_database():
             )
             """
         )
-    except sqlite3.OperationalError:
-        print("Table cooldowns exists")
+    except sqlite3.OperationalError as e:
+        print(e)
 
     try:
         c.execute(
@@ -85,8 +149,8 @@ def create_database():
             )
             """
         )
-    except sqlite3.OperationalError:
-        print("Table commands exists")
+    except sqlite3.OperationalError as e:
+        print(e)
 
     try:
         c.execute(
@@ -98,8 +162,8 @@ def create_database():
             )
             """
         )
-    except sqlite3.OperationalError:
-        print("Table cooldowns exists")
+    except sqlite3.OperationalError as e:
+        print(e)
 
     try:
         c.execute(
@@ -113,7 +177,7 @@ def create_database():
             """
         )
     except sqlite3.OperationalError as e:
-        print(f"Table users exists: {e}")
+        print(e)
 
     conn.commit()
     conn.close()

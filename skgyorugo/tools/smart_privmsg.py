@@ -16,10 +16,15 @@ def _split_message(message: str) -> list[str]:
     return word_list
 
 
-def send(bot: Bot, message_data: Message, message: str):
-    for msg in _split_message(' '.join(message_data.value.split(' ')[1:])):
-        message = message.replace("{message}", msg)
-        message = message.replace("{nick}", message_data.nick)
-        message = message.replace("{channel}", message_data.channel)
+def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1):
+    # for msg in _split_message(' '.join(message_data.value.split(' ')[1:])):
+    #     message = message.replace("{message}", msg)
+    #     message = message.replace("{nick}", message_data.nick)
+    #     message = message.replace("{channel}", message_data.channel)
+    msg = ' '.join(message_data.value.split(' ')[to_remove:])
+    message = message.replace("{message}", msg)
+    message = message.replace("{nick}", message_data.nick)
+    message = message.replace("{channel}", message_data.channel)
+
     messages = _split_message(message)
     bot.send_privmsg(message_data.channel, messages)

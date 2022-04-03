@@ -2,7 +2,7 @@
 
 - [x] youtube api
 - [x] raid / host shoutout
-- [ ] latege (command and auto), could look through auto schedule
+- [x] latege (command and auto), could look through auto schedule
 - [ ] basic math polish notation
 - [x] translator
 - [ ] (?t a replied message / database in memory of messages)
@@ -15,21 +15,22 @@
 - [ ] streamer time
 - [ ] list maker (who's up for flex)
 - [ ] variable counter with cross-command functionality
+- [ ] random variable getter from db {random.quote}
 - [ ] specific word in message {message.0}, {message.1}, etc.
 - [ ] replied variable {reply.nick} {reply.message} {reply.message.0}
 - [ ] sub sellout bot
 - [ ] schedule
 
 ## Basic Commands
-- [ ] int
-- [ ] bald
+- [x] int
+- [x] bald
 - [ ] milk pasta
-- [ ] make spam always output max length
-- [ ] tea
-- [ ] coffee
+- [x] make spam always output max length
+- [x] tea
+- [x] coffee
 - [ ] smelly
 - [ ] coin
 - [ ] permissions
 - [ ] jam
-- [ ] screamlads
-- [ ] supporters
+- [x] screamlads
+- [x] supporters
