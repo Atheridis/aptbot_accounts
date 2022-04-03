@@ -3,8 +3,8 @@ from aptbot.bot import Message, Commands, Bot
 PERMISSION = 99
 PREFIX = '?'
 DESCRIPTION = ""
-USER_COOLDOWN = 10
-GLOBAL_COOLDOWN = 0
+USER_COOLDOWN = 30
+GLOBAL_COOLDOWN = 15
 
 MAX_LENGTH = 469
 
