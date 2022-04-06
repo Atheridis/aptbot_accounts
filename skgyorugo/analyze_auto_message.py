@@ -40,6 +40,7 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
 
     for auto_message in fetched:
         name, cooldown, end_time, last_used, value = auto_message
+        print(auto_message)
         if time.time() < last_used + cooldown:
             continue
         if time.time() > start_stream_ts + end_time and end_time != 0:
