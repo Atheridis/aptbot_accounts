@@ -1,6 +1,7 @@
 from aptbot.bot import Bot, Message, Commands
+from typing import Union
 
-MAX_LENGTH = 469
+MAX_LENGTH = 480
 
 
 def _split_message(message: str) -> list[str]:
@@ -16,7 +17,18 @@ def _split_message(message: str) -> list[str]:
     return word_list
 
 
-def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1):
+def send_safe(bot: Bot, channel: str, messages: Union[str, list]):
+    if isinstance(messages, list):
+        for i in range(len(messages)):
+            if messages[i].startswith('/') or messages[i].startswith('!'):
+                messages[i] = messages[i][1:]
+    else:
+        if messages.startswith('/') or messages.startswith('!'):
+            messages = messages[1:]
+    bot.send_privmsg(channel, messages)
+
+
+def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1, safe_send: bool = True):
     # for msg in _split_message(' '.join(message_data.value.split(' ')[1:])):
     #     message = message.replace("{message}", msg)
     #     message = message.replace("{nick}", message_data.nick)
@@ -27,4 +39,7 @@ def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1):
     message = message.replace("{channel}", message_data.channel)
 
     messages = _split_message(message)
-    bot.send_privmsg(message_data.channel, messages)
+    if safe_send:
+        send_safe(bot, message_data.channel, messages)
+    else:
+        bot.send_privmsg(message_data.channel, messages)

@@ -32,7 +32,7 @@ def create_variables_db():
             CREATE TABLE methods (
                 name TEXT NOT NULL,
                 type TEXT NOT NULL,
-                input TEXT NOT NULL,
+                input TEXT,
                 PRIMARY KEY (name, type)
             )
             """

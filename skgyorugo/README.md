@@ -20,6 +20,7 @@
 - [ ] replied variable {reply.nick} {reply.message} {reply.message.0}
 - [ ] sub sellout bot
 - [ ] schedule
+- [ ] which LoL account are you playing on? (maybe add rank)
 
 ## Basic Commands
 - [x] int

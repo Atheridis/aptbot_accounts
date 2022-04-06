@@ -1,4 +1,5 @@
 from aptbot.bot import Message, Commands, Bot
+import tools.smart_privmsg
 
 PERMISSION = 99
 PREFIX = '?'
@@ -6,7 +7,7 @@ DESCRIPTION = ""
 USER_COOLDOWN = 30
 GLOBAL_COOLDOWN = 15
 
-MAX_LENGTH = 469
+MAX_LENGTH = 450
 
 
 def main(bot: Bot, message: Message):
@@ -14,4 +15,4 @@ def main(bot: Bot, message: Message):
     new_msg = ""
     while len(new_msg) + len(msg) < MAX_LENGTH:
         new_msg += msg + " "
-    bot.send_privmsg(message.channel, new_msg)
+    tools.smart_privmsg.send_safe(bot, message.channel, new_msg)

@@ -23,7 +23,7 @@ def main(bot: Bot, message: Message):
     elif latege_amount > 0:
         msg = f"{message.channel} is Latege by {latege_amount} seconds again Madge"
     elif latege_amount == 0:
-        msg = f"Amazing!!! {message.channel} is EXACTLY on time today ihaspeHappy"
+        msg = f"Amazing!!! {message.channel} is EXACTLY on time today POGGERS"
     else:
         msg = f"UNBELIEVABLE!!!!! {message.channel} is EARLY by {-latege_amount} seconds!!!!\
         This has NEVER happened before POGGERS"
