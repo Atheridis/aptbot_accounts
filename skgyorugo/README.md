@@ -5,7 +5,7 @@
 - [x] latege (command and auto), could look through auto schedule
 - [ ] basic math polish notation
 - [x] translator
-- [ ] (?t a replied message / database in memory of messages)
+- [x] (?t a replied message / database in memory of messages)
 - [ ] followage command
 - [ ] commands in groups
 - [ ] quote adder / remover / getter
@@ -30,8 +30,8 @@
 - [x] tea
 - [x] coffee
 - [ ] smelly
-- [ ] coin
+- [x] coin
 - [ ] permissions
-- [ ] jam
+- [x] jam
 - [x] screamlads
 - [x] supporters
