@@ -1,3 +1,4 @@
+from aptbot.bot import Message, Commands
 import sqlite3
 import os
 import ttv_api.users
@@ -94,11 +95,18 @@ def create_database():
         print(e)
 
     admin_id = ttv_api.users.get_users(user_logins=["skgyorugo"])
+    aptbot_id = ttv_api.users.get_users(user_logins=["murphyai"])
     broadcaster_id = ttv_api.users.get_users(user_logins=[streamer_login])
     if admin_id:
         try:
             c.execute("INSERT INTO users VALUES (?, ?)",
                       (admin_id[0].user_id, 0))
+        except sqlite3.IntegrityError as e:
+            print(e)
+    if aptbot_id:
+        try:
+            c.execute("INSERT INTO users VALUES (?, ?)",
+                      (aptbot_id[0].user_id, 0))
         except sqlite3.IntegrityError as e:
             print(e)
     if broadcaster_id:
@@ -207,6 +215,120 @@ def update_commands_in_database(modules, commands):
                 command_last_used,
             )
         )
+    conn.commit()
+    conn.close()
+
+def add_message_to_chat_history(message: Message):
+    if message.command != Commands.PRIVMSG:
+        return
+    conn = sqlite3.connect(os.path.join(PATH, "chat_history.db"))
+    c = conn.cursor()
+
+    try:
+        bits = message.tags["bits"]
+    except KeyError:
+        bits = None
+    try:
+        rp_display_name = message.tags["reply-parent-display-name"]
+        rp_msg_body = message.tags["reply-parent-msg-body"]
+        rp_msg_id = message.tags["reply-parent-msg-id"]
+        rp_user_id = int( message.tags["reply-parent-user-id"] )
+        rp_user_login = message.tags["reply-parent-user-login"]
+    except KeyError:
+        rp_display_name = None
+        rp_msg_body = None
+        rp_msg_id = None
+        rp_user_id = None
+        rp_user_login = None
+
+    c.execute(
+        """
+        INSERT INTO chat (
+            "id",
+            "nick",
+            "channel",
+            "message",
+            "tmi-sent-ts",
+            "badge-info",
+            "badges",
+            "bits",
+            "color",
+            "display-name",
+            "first-msg",
+            "mod",
+            "room-id",
+            "user-id",
+            "user-type",
+            "turbo",
+            "subscriber",
+            "reply-parent-display-name",
+            "reply-parent-msg-body",
+            "reply-parent-msg-id",
+            "reply-parent-user-id",
+            "reply-parent-user-login"
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+        """,
+        (
+            message.tags["id"],
+            message.nick,
+            message.channel,
+            message.value,
+            int(message.tags["tmi-sent-ts"]),
+            message.tags["badge-info"],
+            message.tags["badges"],
+            bits,
+            message.tags["color"],
+            message.tags["display-name"],
+            int(message.tags["first-msg"]),
+            int( message.tags["mod"] ),
+            int( message.tags["room-id"] ),
+            int( message.tags["user-id"] ),
+            message.tags["user-type"],
+            int( message.tags["turbo"] ),
+            int( message.tags["subscriber"] ),
+            rp_display_name,
+            rp_msg_body,
+            rp_msg_id,
+            rp_user_id,
+            rp_user_login,
+        )
+    )
+    conn.commit()
+    conn.close()
+
+def create_chat_history_database():
+    conn = sqlite3.connect(os.path.join(PATH, "chat_history.db"))
+    c = conn.cursor()
+
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS "chat" (
+            "id"	TEXT NOT NULL,
+            "nick"	TEXT NOT NULL,
+            "channel"	TEXT NOT NULL,
+            "message"	TEXT NOT NULL,
+            "tmi-sent-ts"	INTEGER NOT NULL,
+            "badge-info"	TEXT NOT NULL,
+            "badges"	TEXT NOT NULL,
+            "bits"	TEXT,
+            "color"	TEXT NOT NULL,
+            "display-name"	TEXT NOT NULL,
+            "first-msg"	INTEGER NOT NULL,
+            "mod"	INTEGER NOT NULL,
+            "room-id"	INTEGER NOT NULL,
+            "user-id"	INTEGER NOT NULL,
+            "user-type"	TEXT NOT NULL,
+            "turbo"	INTEGER NOT NULL,
+            "subscriber"	INTEGER NOT NULL,
+            "reply-parent-display-name"	TEXT,
+            "reply-parent-msg-body"	TEXT,
+            "reply-parent-msg-id"	TEXT,
+            "reply-parent-user-id"	INTEGER,
+            "reply-parent-user-login"	TEXT,
+            PRIMARY KEY("id")
+        );
+        """
+    )
     conn.commit()
     conn.close()
 

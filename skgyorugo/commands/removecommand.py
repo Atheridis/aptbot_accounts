@@ -21,10 +21,9 @@ def main(bot: Bot, message: Message):
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
     c.execute(
-        "SELECT value FROM commands WHERE command = ? AND prefix = ?",
+        "SELECT value FROM command_values WHERE command = ?",
         (
             command_name,
-            command_prefix,
         )
     )
     command_path = os.path.join(COMMANDS_PATH, f"{command_name}.py")

@@ -1,4 +1,5 @@
 from yt_api import *
+import html
 
 
 @dataclass
@@ -17,11 +18,10 @@ def get_newest_video(channel_id: str) -> Optional[Video]:
         "GET",
         get_url,
     )
-    print(f"the r.status is {r.status}")
     if r.status != 200:
         return None
     data = json.loads(r.data.decode("utf-8"))["items"][0]
     video_id = data["id"]["videoId"]
-    video_title = data["snippet"]["title"]
+    video_title = html.unescape(data["snippet"]["title"])
 
     return Video(video_title, video_id)

@@ -15,7 +15,11 @@ def send_metric(bot: Bot, message: Message):
         elif cm[i] > 0:
             text += f"{ft_inch[i][0]:.1f}ft. and {ft_inch[i][1]:.1f}in. is {cm[i]:.1f}cm. | "
     if text:
-        tools.smart_privmsg.send(bot, message, text)
+        try:
+            replied_msg_id = message.tags["id"]
+        except KeyError:
+            replied_msg_id = None
+        tools.smart_privmsg.send(bot, message, text, reply=replied_msg_id)
 
 
 def _tometric(text: str) -> tuple[list[tuple[int, int]], list[float]]:

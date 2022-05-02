@@ -29,7 +29,7 @@ def main(bot: Bot, message: Message):
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
     c.execute(
-        "SELECT value FROM commands WHERE command = ? AND prefix = ?",
+        "SELECT value FROM commands LEFT JOIN command_values USING(command) WHERE command = ? AND prefix = ?",
         (
             command_name,
             command_prefix,
@@ -44,7 +44,7 @@ def main(bot: Bot, message: Message):
 
     try:
         c.execute(
-            "UPDATE commands SET value = ? WHERE command = ?",
+            "UPDATE command_values SET value = ? WHERE command = ?",
             (
                 command_value,
                 command_name,

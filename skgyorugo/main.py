@@ -8,8 +8,11 @@ import tools.smart_privmsg
 import tools.permissions
 import analyze_command
 import scripts.unit_converter
+import scripts.alwase
+import scripts.chatting
 import database_manager
 import analyze_auto_message
+import time
 from importlib import reload
 
 reload(tools.raid)
@@ -17,6 +20,8 @@ reload(tools.smart_privmsg)
 reload(tools.permissions)
 reload(analyze_command)
 reload(scripts.unit_converter)
+reload(scripts.alwase)
+reload(scripts.chatting)
 reload(database_manager)
 reload(analyze_auto_message)
 
@@ -90,16 +95,25 @@ for spec in auto_message_specs:
 
 database_manager.create_database()
 database_manager.create_variables_db()
+database_manager.create_chat_history_database()
 database_manager.update_commands_in_database(commands_modules, commands)
 database_manager.update_auto_messages_in_database(
     auto_message_modules, auto_messages)
 
 
+def start(bot: Bot, message: Message):
+    while True:
+        analyze_auto_message.do_auto_message(bot, message, auto_message_modules)
+        time.sleep(30)
+
+
 def main(bot: Bot, message: Message):
     if message.command == Commands.PRIVMSG:
+        database_manager.add_message_to_chat_history(message)
         analyze_command.do_command(bot, message, commands_modules)
         scripts.unit_converter.send_metric(bot, message)
-
-    analyze_auto_message.do_auto_message(bot, message, auto_message_modules)
+        scripts.alwase.alwase(bot, message)
+        scripts.chatting.chatting(bot, message)
+        scripts.chatting.chatting_annoy(bot, message)
 
     tools.raid.raid(bot, message)

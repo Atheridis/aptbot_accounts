@@ -40,14 +40,10 @@ def start_stream_timestamp() -> Optional[int]:
                 max_last_checked[0],
             )
         )
-        print(f"I checked {max_last_checked}")
 
     fetched = c.fetchone()
     if fetched:
         start_stream_ts, last_checked, _ = fetched
-        print(f"stream ts = {start_stream_ts}")
-        print(
-            f"last_checked {last_checked} + check_streamtime_cd {CHECK_STREAMTIME_CD} \n time.time {time.time()}")
         if time.time() < last_checked + CHECK_STREAMTIME_CD:
             return start_stream_ts
 
@@ -75,7 +71,6 @@ def start_stream_timestamp() -> Optional[int]:
 
     if not fetched:
         start_stream_ts = int(stream_info[0].started_at.timestamp())
-        print("TEST")
         c.execute(
             "REPLACE INTO stream_info VALUES (?, ?, ?)",
             (
@@ -88,7 +83,6 @@ def start_stream_timestamp() -> Optional[int]:
         conn.close()
         return start_stream_ts
 
-    print("MORE TEST")
     start_stream_ts, last_checked, _ = fetched
     c.execute(
         "REPLACE INTO stream_info VALUES (?, ?, ?)",

@@ -33,6 +33,22 @@ def main(bot: Bot, message: Message):
 
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
+    c.execute(
+        "SELECT value FROM commands LEFT JOIN command_values USING(command) WHERE command = ? AND prefix = ?",
+        (
+            command_name,
+            command_prefix,
+        )
+    )
+    try:
+        if not c.fetchone()[0]:
+            bot.send_privmsg(
+                message.channel,
+                f"The command {command_prefix}{command_name} already exists"
+            )
+            return
+    except TypeError:
+        pass
     try:
         c.execute(
             "INSERT INTO commands VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -47,26 +63,24 @@ def main(bot: Bot, message: Message):
             )
         )
     except sqlite3.IntegrityError:
-        bot.send_privmsg(
-            message.channel,
-            f"The command {command_name} already exists."
-        )
+        pass
     except Exception as e:
         bot.send_privmsg(
             message.channel,
             f"There was an error adding the command: {e}"
         )
-    else:
-        c.execute(
-            "INSERT INTO command_values VALUES (?, ?)",
-            (
-                command_name,
-                command_value,
-            )
+        conn.close()
+        return
+    c.execute(
+        "INSERT INTO command_values VALUES (?, ?)",
+        (
+            command_name,
+            command_value,
         )
-        bot.send_privmsg(
-            message.channel,
-            f"Successfully added {command_name}."
-        )
+    )
+    bot.send_privmsg(
+        message.channel,
+        f"Successfully added {command_name}."
+    )
     conn.commit()
     conn.close()

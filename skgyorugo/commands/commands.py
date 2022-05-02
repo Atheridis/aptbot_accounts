@@ -40,5 +40,4 @@ def main(bot: Bot, message: Message):
         commands.append(f"{command[0]}{command[1]}")
 
     commands = ' '.join(commands)
-    print(f"commands is: {commands}")
     tools.smart_privmsg.send(bot, message, commands)

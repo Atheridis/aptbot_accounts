@@ -11,7 +11,14 @@ MAX_LENGTH = 450
 
 
 def main(bot: Bot, message: Message):
-    msg = ' '.join(message.value.split(' ')[1:])
+    try:
+        replied_message = message.tags["reply-parent-msg-body"]
+    except KeyError:
+        replied_message = None
+    if replied_message:
+        msg = replied_message
+    else:
+        msg = ' '.join(message.value.split(' ')[1:])
     new_msg = ""
     while len(new_msg) + len(msg) < MAX_LENGTH:
         new_msg += msg + " "

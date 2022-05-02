@@ -17,18 +17,18 @@ def _split_message(message: str) -> list[str]:
     return word_list
 
 
-def send_safe(bot: Bot, channel: str, messages: Union[str, list]):
+def send_safe(bot: Bot, channel: str, messages: Union[str, list], reply=None):
     if isinstance(messages, list):
         for i in range(len(messages)):
-            if messages[i].startswith('/') or messages[i].startswith('!'):
+            if messages[i].startswith('/') or messages[i].startswith('!') or messages[i].startswith('\\') or messages[i].startswith('?'):
                 messages[i] = messages[i][1:]
     else:
-        if messages.startswith('/') or messages.startswith('!'):
+        if messages.startswith('/') or messages.startswith('!') or messages.startswith('\\') or messages.startswith('?'):
             messages = messages[1:]
-    bot.send_privmsg(channel, messages)
+    bot.send_privmsg(channel, messages, reply)
 
 
-def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1, safe_send: bool = True):
+def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1, safe_send: bool = True, reply=None):
     # for msg in _split_message(' '.join(message_data.value.split(' ')[1:])):
     #     message = message.replace("{message}", msg)
     #     message = message.replace("{nick}", message_data.nick)
@@ -40,6 +40,6 @@ def send(bot: Bot, message_data: Message, message: str, to_remove: int = 1, safe
 
     messages = _split_message(message)
     if safe_send:
-        send_safe(bot, message_data.channel, messages)
+        send_safe(bot, message_data.channel, messages, reply)
     else:
-        bot.send_privmsg(message_data.channel, messages)
+        bot.send_privmsg(message_data.channel, messages, reply)

@@ -31,33 +31,45 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
         FROM
             auto_messages
         LEFT JOIN auto_message_values USING (name)
+        ORDER BY
+            last_used ASC
         """
     )
-    fetched = c.fetchall()
+    fetched = c.fetchone()
     if not fetched:
         conn.close()
         return
 
-    for auto_message in fetched:
-        name, cooldown, end_time, last_used, value = auto_message
-        print(auto_message)
-        if time.time() < last_used + cooldown:
-            continue
-        if time.time() > start_stream_ts + end_time and end_time != 0:
-            continue
-        if value:
-            tools.smart_privmsg.send(bot, message, value)
-        else:
+    name, cooldown, end_time, last_used, value = fetched
+    print(fetched)
+    if time.time() < last_used + cooldown:
+        return
+    if time.time() > start_stream_ts + end_time and end_time != 0:
+        return
+    if value:
+        tools.smart_privmsg.send(bot, message, value)
+    else:
+        try:
             auto_message_modules[name].main(bot, message)
-        c.execute(
-            "REPLACE INTO auto_messages VALUES (?, ?, ?, ?)",
-            (
-                name,
-                cooldown,
-                end_time,
-                int(time.time()),
+        except KeyError:
+            c.execute(
+                """
+                    DELETE FROM
+                        auto_messages
+                    WHERE
+                        name = ?
+                """,
+                (name, )
             )
+            conn.commit()
+            return
+
+    c.execute(
+        "UPDATE auto_messages SET last_used = ? WHERE name = ?",
+        (
+            int(time.time()),
+            name,
         )
-        conn.commit()
-        time.sleep(1.5)
+    )
+    conn.commit()
     conn.close()

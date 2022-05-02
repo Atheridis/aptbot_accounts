@@ -12,7 +12,15 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
 
-    command = message.value.split(' ')[0]
+    try:
+        replied_message = message.tags["reply-parent-msg-body"]
+    except KeyError:
+        replied_message = None
+
+    if replied_message:
+        command = message.value.split(' ')[1]
+    else:
+        command = message.value.split(' ')[0]
     prefix = command[0]
     command = command[1:]
     user_id = message.tags["user-id"]
@@ -26,10 +34,13 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
             value,
             commands.user_cooldown,
             commands.global_cooldown,
-            CASE WHEN cooldowns.user_cooldown >= (commands.last_used + commands.global_cooldown) THEN
-                cooldowns.user_cooldown
-            ELSE
-                (commands.last_used + commands.global_cooldown)
+            CASE 
+                WHEN ? <= 10 THEN
+                    0
+                WHEN cooldowns.user_cooldown >= (commands.last_used + commands.global_cooldown) THEN
+                    cooldowns.user_cooldown
+                ELSE
+                    (commands.last_used + commands.global_cooldown)
             END AS avail_time
 
         FROM
@@ -46,6 +57,7 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
             AND permission >= ?
         """,
         (
+            user_perm,
             user_id,
             command,
             prefix,
@@ -53,7 +65,6 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
         )
     )
     fetched = c.fetchall()
-    print(fetched)
     if not fetched:
         conn.close()
         return
