@@ -13,6 +13,7 @@ import scripts.chatting
 import database_manager
 import analyze_auto_message
 import time
+import logging
 from importlib import reload
 
 reload(tools.raid)
@@ -25,10 +26,14 @@ reload(scripts.chatting)
 reload(database_manager)
 reload(analyze_auto_message)
 
+logging.basicConfig(filename="/var/log/aptbot/logs.log", level=logging.DEBUG)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+logging.info(f"Defined PATH: {PATH}")
 COMMANDS_PATH = os.path.join(PATH, "commands")
+logging.info(f"Defined COMMANDS_PATH: {COMMANDS_PATH}")
 AUTO_MESSAGES_PATH = os.path.join(PATH, "auto_messages")
+logging.info(f"Defined AUTO_MESSAGES_PATH: {AUTO_MESSAGES_PATH}")
 
 commands_specs = {}
 commands_modules = {}
@@ -49,7 +54,7 @@ for command in commands:
             os.path.join(COMMANDS_PATH, command)
         )
     )
-print(f"my commands are {commands}")
+logging.info(f"List of commands: {commands}")
 
 auto_messages = [
     c for c in os.listdir(AUTO_MESSAGES_PATH) if os.path.isfile(os.path.join(AUTO_MESSAGES_PATH, c))
@@ -67,6 +72,7 @@ for auto_message in auto_messages:
             os.path.join(AUTO_MESSAGES_PATH, auto_message)
         )
     )
+logging.info(f"List of auto_messages: {auto_messages}")
 
 for spec in commands_specs:
     commands_modules[spec] = importlib.util.module_from_spec(
@@ -76,9 +82,8 @@ for spec in commands_specs:
     try:
         commands_specs[spec].loader.exec_module(commands_modules[spec])
     except Exception as e:
-        print()
-        print(traceback.format_exc())
-        print(f"Problem Loading Module: {e}")
+        logging.critical(traceback.format_exc())
+        logging.critical(f"Problem Loading Module: {e}")
 
 for spec in auto_message_specs:
     auto_message_modules[spec] = importlib.util.module_from_spec(
@@ -88,9 +93,8 @@ for spec in auto_message_specs:
     try:
         auto_message_specs[spec].loader.exec_module(auto_message_modules[spec])
     except Exception as e:
-        print()
-        print(traceback.format_exc())
-        print(f"Problem Loading Module: {e}")
+        logging.critical(traceback.format_exc())
+        logging.critical(f"Problem Loading Module: {e}")
 
 
 database_manager.create_database()
