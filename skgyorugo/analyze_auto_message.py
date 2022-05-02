@@ -47,11 +47,9 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
             continue
         if value:
             tools.smart_privmsg.send(bot, message, value)
-            break
         else:
             try:
                 auto_message_modules[name].main(bot, message)
-                break
             except KeyError:
                 c.execute(
                     """
@@ -73,4 +71,5 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
             )
         )
         conn.commit()
+        break
     conn.close()
