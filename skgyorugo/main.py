@@ -26,7 +26,11 @@ reload(scripts.chatting)
 reload(database_manager)
 reload(analyze_auto_message)
 
-logging.basicConfig(filename="/var/log/aptbot/logs.log", level=logging.DEBUG)
+logging.basicConfig(
+    filename="/var/log/aptbot/logs.log",
+    level=logging.DEBUG,
+    format="[%(levelname)s] %(asctime)s: %(message)s"
+)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 logging.info(f"Defined PATH: {PATH}")
