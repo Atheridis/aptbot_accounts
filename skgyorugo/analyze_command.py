@@ -3,14 +3,20 @@ import random
 import sqlite3
 import tools.permissions
 import tools.smart_privmsg
+import logging
 from aptbot.bot import Bot, Message, Commands
 
+logger = logging.getLogger(__name__)
+
 PATH = os.path.dirname(os.path.realpath(__file__))
+logger.debug(f"PATH set to: {PATH}")
 
 
 def do_command(bot: Bot, message: Message, command_modules: dict):
-    conn = sqlite3.connect(os.path.join(PATH, "database.db"))
+    db_name_database = "database.db"
+    conn = sqlite3.connect(os.path.join(PATH, db_name_database))
     c = conn.cursor()
+    logger.info(f"connected to database {db_name_database}")
 
     try:
         replied_message = message.tags["reply-parent-msg-body"]

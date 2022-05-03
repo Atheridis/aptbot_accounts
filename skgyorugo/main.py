@@ -26,18 +26,22 @@ reload(scripts.chatting)
 reload(database_manager)
 reload(analyze_auto_message)
 
-logging.basicConfig(
-    filename="/var/log/aptbot/logs.log",
-    level=logging.DEBUG,
-    format="[%(levelname)s] %(asctime)s: %(message)s"
-)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
+
+file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
-logging.info(f"Defined PATH: {PATH}")
+logger.info(f"main PATH set to: {PATH}")
 COMMANDS_PATH = os.path.join(PATH, "commands")
-logging.info(f"Defined COMMANDS_PATH: {COMMANDS_PATH}")
+logger.info(f"main COMMANDS_PATH set to: {COMMANDS_PATH}")
 AUTO_MESSAGES_PATH = os.path.join(PATH, "auto_messages")
-logging.info(f"Defined AUTO_MESSAGES_PATH: {AUTO_MESSAGES_PATH}")
+logger.info(f"main AUTO_MESSAGES_PATH set to: {AUTO_MESSAGES_PATH}")
 
 commands_specs = {}
 commands_modules = {}
@@ -58,7 +62,7 @@ for command in commands:
             os.path.join(COMMANDS_PATH, command)
         )
     )
-logging.info(f"List of commands: {commands}")
+logger.info(f"List of commands: {commands}")
 
 auto_messages = [
     c for c in os.listdir(AUTO_MESSAGES_PATH) if os.path.isfile(os.path.join(AUTO_MESSAGES_PATH, c))
@@ -76,7 +80,7 @@ for auto_message in auto_messages:
             os.path.join(AUTO_MESSAGES_PATH, auto_message)
         )
     )
-logging.info(f"List of auto_messages: {auto_messages}")
+logger.info(f"List of auto_messages: {auto_messages}")
 
 for spec in commands_specs:
     commands_modules[spec] = importlib.util.module_from_spec(
@@ -86,8 +90,8 @@ for spec in commands_specs:
     try:
         commands_specs[spec].loader.exec_module(commands_modules[spec])
     except Exception as e:
-        logging.critical(traceback.format_exc())
-        logging.critical(f"Problem Loading Module: {e}")
+        logger.critical(traceback.format_exc())
+        logger.critical(f"Problem Loading Module: {e}")
 
 for spec in auto_message_specs:
     auto_message_modules[spec] = importlib.util.module_from_spec(
@@ -97,8 +101,8 @@ for spec in auto_message_specs:
     try:
         auto_message_specs[spec].loader.exec_module(auto_message_modules[spec])
     except Exception as e:
-        logging.critical(traceback.format_exc())
-        logging.critical(f"Problem Loading Module: {e}")
+        logger.critical(traceback.format_exc())
+        logger.critical(f"Problem Loading Module: {e}")
 
 
 database_manager.create_database()

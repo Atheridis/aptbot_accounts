@@ -2,198 +2,186 @@ from aptbot.bot import Message, Commands
 import sqlite3
 import os
 import ttv_api.users
+import logging
+
+logger = logging.getLogger(__name__)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+logger.debug(f"PATH set to: {PATH}")
 
 STREAMER_PATH = os.path.abspath(os.path.join(__file__, ".."))
+logger.debug(f"STREAMER_PATH set to: {STREAMER_PATH}")
 streamer_login = os.path.split(STREAMER_PATH)[1]
+logger.debug(f"streamer_login set to: {streamer_login}")
 
 
 def create_variables_db():
-    conn = sqlite3.connect(os.path.join(PATH, "variables.db"))
+    db_name_var = "variables.db" 
+    conn = sqlite3.connect(os.path.join(PATH, db_name_var))
     c = conn.cursor()
+    logger.info(f"connected to database {db_name_var}")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE variables (
-                name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                value TEXT NOT NULL,
-                PRIMARY KEY (name)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS variables (
+            name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            value TEXT NOT NULL,
+            PRIMARY KEY (name)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table variables")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE methods (
-                name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                input TEXT,
-                PRIMARY KEY (name, type)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS methods (
+            name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            input TEXT,
+            PRIMARY KEY (name, type)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table methods")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE list_values (
-                id INTEGER NOT NULL,
-                name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                value TEXT NOT NULL,
-                FOREIGN KEY(name) REFERENCES variables(name)
-                PRIMARY KEY (id, name)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS list_values (
+            id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            value TEXT NOT NULL,
+            FOREIGN KEY(name) REFERENCES variables(name)
+            PRIMARY KEY (id, name)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table list_values")
 
+    conn.commit()
     conn.close()
 
 
 def create_database():
-    conn = sqlite3.connect(os.path.join(PATH, "database.db"))
+    db_name_database = "database.db"
+    conn = sqlite3.connect(os.path.join(PATH, db_name_database))
     c = conn.cursor()
-    try:
-        c.execute(
-            """
-            CREATE TABLE commands (
-                command TEXT NOT NULL,
-                prefix TEXT NOT NULL,
-                permission INTEGER NOT NULL,
-                description TEXT,
-                user_cooldown INTEGER NOT NULL,
-                global_cooldown INTEGER NOT NULL,
-                last_used INTEGER NOT NULL,
-                PRIMARY KEY (command)
-            )
-            """
-        )
-    except sqlite3.OperationalError as e:
-        print(e)
+    logger.info(f"connected to database {db_name_database}")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE users (
-                user_id text NOT NULL,
-                permission INTEGER NOT NULL,
-                PRIMARY KEY (user_id)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS commands (
+            command TEXT NOT NULL,
+            prefix TEXT NOT NULL,
+            permission INTEGER NOT NULL,
+            description TEXT,
+            user_cooldown INTEGER NOT NULL,
+            global_cooldown INTEGER NOT NULL,
+            last_used INTEGER NOT NULL,
+            PRIMARY KEY (command)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table commands")
+
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            user_id text NOT NULL,
+            permission INTEGER NOT NULL,
+            PRIMARY KEY (user_id)
+        )
+        """
+    )
+    logger.info(f"created table users")
 
     admin_id = ttv_api.users.get_users(user_logins=["skgyorugo"])
     aptbot_id = ttv_api.users.get_users(user_logins=["murphyai"])
     broadcaster_id = ttv_api.users.get_users(user_logins=[streamer_login])
     if admin_id:
-        try:
-            c.execute("INSERT INTO users VALUES (?, ?)",
-                      (admin_id[0].user_id, 0))
-        except sqlite3.IntegrityError as e:
-            print(e)
+        c.execute("INSERT OR IGNORE INTO users VALUES (?, ?)",
+                  (admin_id[0].user_id, 0))
+        logger.info(f"inserted user {admin_id[0].user_id} with permission {0}")
     if aptbot_id:
-        try:
-            c.execute("INSERT INTO users VALUES (?, ?)",
-                      (aptbot_id[0].user_id, 0))
-        except sqlite3.IntegrityError as e:
-            print(e)
+        c.execute("INSERT OR IGNORE INTO users VALUES (?, ?)",
+                  (aptbot_id[0].user_id, 0))
+        logger.info(f"inserted user {aptbot_id[0].user_id} with permission {0}")
     if broadcaster_id:
-        try:
-            c.execute("INSERT INTO users VALUES (?, ?)",
-                      (broadcaster_id[0].user_id, 1))
-        except sqlite3.IntegrityError as e:
-            print(e)
+        c.execute("INSERT OR IGNORE INTO users VALUES (?, ?)",
+                  (broadcaster_id[0].user_id, 1))
+        logger.info(f"inserted user {broadcaster_id[0].user_id} with permission {1}")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE cooldowns (
-                user_id TEXT NOT NULL,
-                command TEXT NOT NULL,
-                user_cooldown INTEGER NOT NULL,
-                FOREIGN KEY(user_id) REFERENCES users(user_id)
-                FOREIGN KEY(command) REFERENCES commands(command)
-                PRIMARY KEY (user_id, command)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cooldowns (
+            user_id TEXT NOT NULL,
+            command TEXT NOT NULL,
+            user_cooldown INTEGER NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(user_id)
+            FOREIGN KEY(command) REFERENCES commands(command)
+            PRIMARY KEY (user_id, command)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table cooldowns")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE command_values (
-                command TEXT NOT NULL,
-                value TEXT NOT NULL,
-                FOREIGN KEY(command) REFERENCES commands(command)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS command_values (
+            command TEXT NOT NULL,
+            value TEXT NOT NULL,
+            FOREIGN KEY(command) REFERENCES commands(command)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table command_values")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE auto_messages (
-                name TEXT NOT NULL,
-                cooldown INTEGER NOT NULL,
-                end_time INTEGER NOT NULL,
-                last_used INTEGER NOT NULL,
-                PRIMARY KEY (name)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS auto_messages (
+            name TEXT NOT NULL,
+            cooldown INTEGER NOT NULL,
+            end_time INTEGER NOT NULL,
+            last_used INTEGER NOT NULL,
+            PRIMARY KEY (name)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table auto_messages")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE auto_message_values (
-                name TEXT NOT NULL,
-                value TEXT NOT NULL,
-                FOREIGN KEY(name) REFERENCES auto_messages(name)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS auto_message_values (
+            name TEXT NOT NULL,
+            value TEXT NOT NULL,
+            FOREIGN KEY(name) REFERENCES auto_messages(name)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table auto_message_values")
 
-    try:
-        c.execute(
-            """
-            CREATE TABLE stream_info (
-                start_stream_ts INTEGER NOT NULL,
-                last_checked INTEGER NOT NULL,
-                ended INTEGER NOT NULL,
-                PRIMARY KEY (start_stream_ts)
-            )
-            """
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS stream_info (
+            start_stream_ts INTEGER NOT NULL,
+            last_checked INTEGER NOT NULL,
+            ended INTEGER NOT NULL,
+            PRIMARY KEY (start_stream_ts)
         )
-    except sqlite3.OperationalError as e:
-        print(e)
+        """
+    )
+    logger.info(f"created table stream_info")
 
     conn.commit()
     conn.close()
 
 
 def update_commands_in_database(modules, commands):
-    conn = sqlite3.connect(os.path.join(PATH, "database.db"))
+    db_name_database = "database.db"
+    conn = sqlite3.connect(os.path.join(PATH, db_name_database))
     c = conn.cursor()
+    logger.info(f"connected to database {db_name_database}")
 
     for command in commands:
         command_name = command.split('.')[0]
@@ -215,6 +203,13 @@ def update_commands_in_database(modules, commands):
                 command_last_used,
             )
         )
+        logger.info(f"updating commands command_name: {command_name}")
+        logger.debug(f"updating commands command_prefix: {command_prefix}")
+        logger.debug(f"updating commands command_permission: {command_permission}")
+        logger.debug(f"updating commands command_description: {command_description}")
+        logger.debug(f"updating commands command_user_cooldown: {command_user_cooldown}")
+        logger.debug(f"updating commands command_global_cooldown: {command_global_cooldown}")
+        logger.debug(f"updating commands command_last_used: {command_last_used}")
     conn.commit()
     conn.close()
 

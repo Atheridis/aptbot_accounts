@@ -27,4 +27,4 @@ def main(bot: Bot, message: Message):
     else:
         msg = f"UNBELIEVABLE!!!!! {message.channel} is EARLY by {-latege_amount} seconds!!!!\
         This has NEVER happened before POGGERS"
-    bot.send_privmsg(message.channel, msg)
+    bot.send_privmsg(message.channel, "/announceblue " + msg)

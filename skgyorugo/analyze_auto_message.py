@@ -4,12 +4,16 @@ import sqlite3
 import time
 import tools.smart_privmsg
 import tools.smart_start_stream_time
+import logging
 from importlib import reload
 
 reload(tools.smart_privmsg)
 reload(tools.smart_start_stream_time)
 
+logger = logging.getLogger(__name__)
+
 PATH = os.path.dirname(os.path.realpath(__file__))
+logger.debug(f"analyze_auto_message PATH set to: {PATH}")
 
 
 def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
