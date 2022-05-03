@@ -15,6 +15,7 @@ formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)
 file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
 file_handler.setFormatter(formatter)
 
+logger.handlers = []
 logger.addHandler(file_handler)
 
 STREAMER_PATH = os.path.abspath(os.path.join(__file__, "../.."))

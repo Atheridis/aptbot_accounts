@@ -18,6 +18,7 @@ formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)
 file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
 file_handler.setFormatter(formatter)
 
+logger.handlers = []
 logger.addHandler(file_handler)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
