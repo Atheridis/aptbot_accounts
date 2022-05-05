@@ -71,6 +71,27 @@ def create_variables_db():
     conn.commit()
     conn.close()
 
+def create_lol_database():
+    db_name_database = "lol_data.db"
+    conn = sqlite3.connect(os.path.join(PATH, db_name_database))
+    c = conn.cursor()
+    logger.info(f"connected to database {db_name_database}")
+
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS accounts (
+            puuid TEXT NOT NULL,
+            summoner_id TEXT NOT NULL,
+            account_id TEXT NOT NULL,
+            twitch_id INTEGER,
+            PRIMARY KEY (puuid)
+        )
+        """
+    )
+    logger.info(f"created table accounts")
+
+    conn.commit()
+    conn.close()
 
 def create_database():
     db_name_database = "database.db"

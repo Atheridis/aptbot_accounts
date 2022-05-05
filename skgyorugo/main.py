@@ -107,6 +107,7 @@ for spec in auto_message_specs:
 
 
 database_manager.create_database()
+database_manager.create_lol_database()
 database_manager.create_variables_db()
 database_manager.create_chat_history_database()
 database_manager.update_commands_in_database(commands_modules, commands)
