@@ -38,11 +38,11 @@ logger.handlers = []
 logger.addHandler(file_handler)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
-logger.info(f"main PATH set to: {PATH}")
+logger.info(f"PATH set to: {PATH}")
 COMMANDS_PATH = os.path.join(PATH, "commands")
-logger.info(f"main COMMANDS_PATH set to: {COMMANDS_PATH}")
+logger.info(f"COMMANDS_PATH set to: {COMMANDS_PATH}")
 AUTO_MESSAGES_PATH = os.path.join(PATH, "auto_messages")
-logger.info(f"main AUTO_MESSAGES_PATH set to: {AUTO_MESSAGES_PATH}")
+logger.info(f"AUTO_MESSAGES_PATH set to: {AUTO_MESSAGES_PATH}")
 
 commands_specs = {}
 commands_modules = {}
