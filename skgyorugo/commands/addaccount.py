@@ -30,6 +30,7 @@ PATH = os.path.join(PATH, "..")
 def main(bot: Bot, message: Message):
     msg = ' '.join(message.value.split(' ')[1:])
     summoner_name, twitch_name = msg.split('|')
+    twitch_name = twitch_name.strip()
     summoner = lol_api.summoner_v4.get_summoner_from_name(summoner_name)
     twitch = ttv_api.users.get_users(user_logins=[twitch_name])
     if summoner is None:
