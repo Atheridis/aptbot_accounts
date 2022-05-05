@@ -25,6 +25,7 @@ class Summoner:
 def get_summoner_from_puuid(puuid: str) -> Optional[Summoner]:
     endpoint = f"/lol/summoner/v4/summoners/by-puuid/{puuid}"
     url = BASE_URL + endpoint
+    logger.debug(f"url is: {url}")
     http = urllib3.PoolManager()
     r = http.request(
         "GET",
@@ -49,6 +50,7 @@ def get_summoner_from_puuid(puuid: str) -> Optional[Summoner]:
 def get_summoner_from_name(name: str) -> Optional[Summoner]:
     endpoint = f"/lol/summoner/v4/summoners/by-name/{name}"
     url = BASE_URL + endpoint
+    logger.debug(f"url is: {url}")
     http = urllib3.PoolManager()
     r = http.request(
         "GET",

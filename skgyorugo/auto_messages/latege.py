@@ -4,7 +4,7 @@ from datetime import datetime
 import tools.smart_start_stream_time
 
 COOLDOWN = 120
-END_TIME = COOLDOWN * 6
+END_TIME = COOLDOWN * 8
 
 STREAM_SCHEDULE = dt.time(17, 30)
 
@@ -27,4 +27,4 @@ def main(bot: Bot, message: Message):
     else:
         msg = f"UNBELIEVABLE!!!!! {message.channel} is EARLY by {-latege_amount} seconds!!!!\
         This has NEVER happened before POGGERS"
-    bot.send_privmsg(message.channel, "/announceblue " + msg)
+    bot.send_privmsg(message.channel, "/announce " + msg)
