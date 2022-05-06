@@ -22,20 +22,47 @@ logger.addHandler(file_handler)
 PERMISSION = 99
 PREFIX = '?'
 DESCRIPTION = "Figures out which LoL Account {channel} is playing on"
-USER_COOLDOWN = 5
-GLOBAL_COOLDOWN = 0
+USER_COOLDOWN = 20
+GLOBAL_COOLDOWN = 15
 
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, "..")
 
+def get_streamer_data():
+    raise NotImplementedError()
+
+def get_twitch_user_data(twitch_id: int):
+    raise NotImplementedError()
+
 def main(bot: Bot, message: Message):
-    streamer_data = ttv_api.users.get_users(user_logins=[message.channel])
-    if not streamer_data:
-        logger.warning(f"There was an issue getting streamer data for {message.channel}")
+    try:
+        replied_message = message.tags["reply-parent-msg-body"]
+    except KeyError:
+        replied_message = None
+    if replied_message:
+        msg = replied_message
+        replied_msg_id = message.tags["reply-parent-msg-id"]
+    else:
+        msg = ' '.join(message.value.split(' ')[1:])
+        replied_msg_id = None
+
+    try:
+        twitch_user = message.value.split(' ')[1]
+    except IndexError:
+        twitch_id = message.tags.get("reply-parent-user-id", ttv_api.users.get_users(user_logins=[message.channel]))
+    else:
+        twitch_id = ttv_api.users.get_users(user_logins=[twitch_user])
+
+    if not twitch_id:
+        logger.warning(f"There was an issue getting twitch data for user {twitch_id}; message was: {message.value}")
         smart_privmsg.send(bot, message, "Couldn't retrieve data", reply=message.tags["id"])
         return
-    twitch_id = int(streamer_data[0].user_id)
+
+    if not isinstance(twitch_id, str):
+        twitch_id = int(twitch_id[0].user_id)
+    else:
+        twitch_id = int(twitch_id)
     db_name_database = "lol_data.db"
     conn = sqlite3.connect(os.path.join(PATH, db_name_database))
     c = conn.cursor()
@@ -47,6 +74,10 @@ def main(bot: Bot, message: Message):
         (twitch_id,)
     )
     fetched = c.fetchall()
+
+    if not fetched:
+        smart_privmsg.send(bot, message, f"No summoners added for that twitch user", reply=message.tags["id"])
+        return
     
     summoner_names = []
     for summoners in fetched:
@@ -57,8 +88,7 @@ def main(bot: Bot, message: Message):
         if info:
             break
     else:
-        smart_privmsg.send(bot, message, f"{{channel}} is currently not in game.", reply=message.tags["id"])
-        smart_privmsg.send(bot, message, f"These are all of his summoners: {summoner_names}", reply=message.tags["id"])
+        smart_privmsg.send(bot, message, f"{{channel}} is currently not in game. These are all of his summoners: {summoner_names}", reply=message.tags["id"])
         return
 
     smart_privmsg.send(bot, message, f"{{channel}} is currently playing a game on: {summoner_names[-1]}", reply=message.tags["id"])
