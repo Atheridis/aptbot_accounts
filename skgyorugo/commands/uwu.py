@@ -27,12 +27,12 @@ PATH = os.path.join(PATH, "..")
 
 def main(bot: Bot, message: Message):
     if message.tags.get("reply-parent-display-name", None):
-        smart_privmsg.send(bot, message, f"UwU {message.tags['reply-parent-display-name']}", reply=message.tags['reply-parent-msg-id'])
+        smart_privmsg.send(bot, message, f"{message.tags['reply-parent-display-name']}, {message.nick} is UwUing you. Will you UwU back? PauseChamp", reply=message.tags['reply-parent-msg-id'])
         return
     try:
         user = message.value.split(' ')[1]
     except IndexError:
-        smart_privmsg.send(bot, message, f"UwU to you too {message.nick}!")
+        smart_privmsg.send(bot, message, f"UwU to you too {message.nick}!", reply=message.tags["id"])
         return
     else:
         smart_privmsg.send(bot, message, f"{user}, {message.nick} is UwUing you. Will you UwU back? PauseChamp")
