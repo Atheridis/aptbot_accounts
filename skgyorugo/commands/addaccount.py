@@ -33,11 +33,11 @@ def main(bot: Bot, message: Message):
     twitch_name = twitch_name.strip()
     summoner = lol_api.summoner_v4.get_summoner_from_name(summoner_name)
     twitch = ttv_api.users.get_users(user_logins=[twitch_name])
-    if summoner is None:
+    if not summoner:
         logger.warning(f"Account {summoner_name} wasn't able to be added")
         bot.send_privmsg(message.channel, f"Error, unable to add summoner: {summoner_name}")
         return
-    if twitch is None:
+    if not twitch:
         logger.warning(f"Unable to use twitch account {twitch_name}")
         bot.send_privmsg(message.channel, f"Error, unable to use twitch account: {twitch_name}")
         return
