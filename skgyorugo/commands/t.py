@@ -10,10 +10,7 @@ GLOBAL_COOLDOWN = 5
 
 
 def main(bot: Bot, message: Message):
-    try:
-        replied_message = message.tags["reply-parent-msg-body"]
-    except KeyError:
-        replied_message = None
+    replied_message = message.tags.get("reply-parent-msg-body", None)
     if replied_message:
         msg = replied_message
         replied_msg_id = message.tags["reply-parent-msg-id"]

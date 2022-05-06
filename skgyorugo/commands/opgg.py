@@ -29,15 +29,12 @@ GLOBAL_COOLDOWN = 15
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, "..")
 
-def get_streamer_data():
-    raise NotImplementedError()
-
-def get_twitch_user_data(twitch_id: int):
-    raise NotImplementedError()
-
 def main(bot: Bot, message: Message):
+    index_skip = 0
+    if message.tags.get("reply-parent-user-id", None):
+        index_skip += 1
     try:
-        twitch_user = message.value.split(' ')[1]
+        twitch_user = message.value.split(' ')[1 + index_skip]
     except IndexError:
         twitch_user = message.tags.get("reply-parent-display-name", message.channel)
         twitch_id = message.tags.get("reply-parent-user-id", ttv_api.users.get_users(user_logins=[message.channel]))
