@@ -40,7 +40,7 @@ def main(bot: Bot, message: Message):
 
     c.execute(
         """
-        SELECT twitch_id WHERE available = 1 ORDER BY position ASC;
+        SELECT twitch_id FROM lol_queue WHERE available = 1 ORDER BY position ASC;
         """
     )
     fetched = c.fetchall()
