@@ -60,7 +60,7 @@ def main(bot: Bot, message: Message):
                             FROM
                                 lol_queue
                             WHERE
-                                name = ?
+                                twitch_id = ?
                         )
                 ) + (
                     SELECT
@@ -68,7 +68,7 @@ def main(bot: Bot, message: Message):
                     FROM
                         lol_queue
                     WHERE
-                        name = ?
+                        twitch_id = ?
                 ) - position
             WHERE
                 position in (
@@ -84,7 +84,7 @@ def main(bot: Bot, message: Message):
                                 FROM
                                     lol_queue
                                 WHERE
-                                    name = ?
+                                    twitch_id = ?
                             )
                     ),
                     (
@@ -93,7 +93,7 @@ def main(bot: Bot, message: Message):
                         FROM
                             lol_queue
                         WHERE
-                            name = ?
+                            twitch_id = ?
                     )
                 );
             """,
