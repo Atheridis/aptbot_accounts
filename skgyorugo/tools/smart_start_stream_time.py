@@ -5,6 +5,7 @@ import ttv_api.stream
 import ttv_api.channel
 import sqlite3
 import logging
+from scripts import clean_queue
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
 
-file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
+file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
 file_handler.setFormatter(formatter)
 
 logger.handlers = []
@@ -25,15 +26,47 @@ logger.debug(f"TOOLS_PATH set to: {TOOLS_PATH}")
 PATH = os.path.join(TOOLS_PATH, "..")
 logger.debug(f"PATH set to: {PATH}")
 
+streamer_login = os.path.split(STREAMER_PATH)[1]
+logger.debug(f"streamer_login set to: {streamer_login}")
+
 
 CHECK_STREAMTIME_CD = 5 * 60
 MAX_OFF_STREAM_MARGIN = 60 * 60
 
 
-def start_stream_timestamp() -> Optional[int]:
-    streamer_login = os.path.split(STREAMER_PATH)[1]
-    logger.debug(f"streamer_login set to: {streamer_login}")
+def end_stream():
+    clean_queue.clean_queue()
 
+
+def start_stream():
+    clean_queue.clean_queue()
+
+
+def start_stream_timestamp() -> Optional[int]:
+    conn = sqlite3.connect(os.path.join(PATH, "database.db"))
+    c = conn.cursor()
+
+    c.execute(
+        """
+        SELECT
+            start_stream_ts
+        FROM
+            stream_info
+        WHERE
+            ended = 0;
+        """
+    )
+
+    fetched = c.fetchone()
+    conn.close()
+
+    try:
+        return fetched[0]
+    except TypeError:
+        return None
+
+
+def update_start_stream_timestamp() -> Optional[int]:
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
 
@@ -51,9 +84,7 @@ def start_stream_timestamp() -> Optional[int]:
                 last_checked = ?
                 AND ended = 0
             """,
-            (
-                max_last_checked[0],
-            )
+            (max_last_checked[0],),
         )
 
     fetched = c.fetchone()
@@ -79,7 +110,9 @@ def start_stream_timestamp() -> Optional[int]:
         logger.debug(f"start_stream_ts set to: {start_stream_ts}")
         logger.debug(f"last_checked set to: {last_checked}")
         if time.time() < last_checked + MAX_OFF_STREAM_MARGIN:
-            logger.info(f"streamer {streamer_login} is currently not streaming, stream not considered ended yet")
+            logger.info(
+                f"streamer {streamer_login} is currently not streaming, stream not considered ended yet"
+            )
             conn.close()
             return
 
@@ -89,11 +122,13 @@ def start_stream_timestamp() -> Optional[int]:
                 start_stream_ts,
                 last_checked,
                 1,
-            )
+            ),
         )
         conn.commit()
         logger.info(f"streamer {streamer_login} has ended stream")
         conn.close()
+        # TODO add hook, streamer ended stream
+        end_stream()
         return
 
     if not fetched:
@@ -105,12 +140,16 @@ def start_stream_timestamp() -> Optional[int]:
                 start_stream_ts,
                 current_time,
                 0,
-            )
+            ),
         )
         conn.commit()
-        logger.info(f"inserted database with start stream {start_stream_ts}, last updated {current_time}")
+        logger.info(
+            f"inserted database with start stream {start_stream_ts}, last updated {current_time}"
+        )
         conn.close()
         logger.info(f"returned api start stream time: {start_stream_ts}")
+        # TODO add hook, streamer started streaming
+        start_stream()
         return start_stream_ts
 
     start_stream_ts, last_checked = fetched
@@ -121,10 +160,12 @@ def start_stream_timestamp() -> Optional[int]:
             start_stream_ts,
             current_time,
             0,
-        )
+        ),
     )
     conn.commit()
-    logger.info(f"updated database with cached start stream {start_stream_ts}, last updated {current_time}")
+    logger.info(
+        f"updated database with cached start stream {start_stream_ts}, last updated {current_time}"
+    )
     conn.close()
     logger.info(f"returned cached start stream time: {start_stream_ts}")
     return start_stream_ts

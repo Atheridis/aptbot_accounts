@@ -12,7 +12,7 @@ logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
 
-file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
+file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
 file_handler.setFormatter(formatter)
 
 logger.handlers = []
@@ -20,7 +20,7 @@ logger.addHandler(file_handler)
 
 
 PERMISSION = 99
-PREFIX = '?'
+PREFIX = "?"
 DESCRIPTION = "Figures out which LoL Account {channel} is playing on"
 USER_COOLDOWN = 20
 GLOBAL_COOLDOWN = 15
@@ -29,21 +29,29 @@ GLOBAL_COOLDOWN = 15
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, "..")
 
+
 def main(bot: Bot, message: Message):
     index_skip = 0
     if message.tags.get("reply-parent-user-id", None):
         index_skip += 1
     try:
-        twitch_user = message.value.split(' ')[1 + index_skip]
+        twitch_user = message.value.split(" ")[1 + index_skip]
     except IndexError:
         twitch_user = message.tags.get("reply-parent-display-name", message.channel)
-        twitch_id = message.tags.get("reply-parent-user-id", ttv_api.users.get_users(user_logins=[message.channel]))
+        twitch_id = message.tags.get(
+            "reply-parent-user-id",
+            ttv_api.users.get_users(user_logins=[message.channel]),
+        )
     else:
         twitch_id = ttv_api.users.get_users(user_logins=[twitch_user])
 
     if not twitch_id:
-        logger.warning(f"There was an issue getting twitch data for user {twitch_id}; message id was: {message.tags['id']}")
-        smart_privmsg.send(bot, message, "Couldn't retrieve data", reply=message.tags["id"])
+        logger.warning(
+            f"There was an issue getting twitch data for user {twitch_id}; message id was: {message.tags['id']}"
+        )
+        smart_privmsg.send(
+            bot, message, "Couldn't retrieve data", reply=message.tags["id"]
+        )
         return
 
     if not isinstance(twitch_id, str):
@@ -58,14 +66,20 @@ def main(bot: Bot, message: Message):
         """
         SELECT summoner_id, puuid FROM accounts WHERE twitch_id = ?;
         """,
-        (twitch_id,)
+        (twitch_id,),
     )
     fetched = c.fetchall()
 
     if not fetched:
-        smart_privmsg.send(bot, message, f"No summoners added for {twitch_user}", reply=message.tags["id"])
+        smart_privmsg.send(
+            bot,
+            message,
+            f"No summoners added for {twitch_user}",
+            reply=message.tags["id"],
+        )
+        conn.close()
         return
-    
+
     summoner_names = []
     for summoners in fetched:
         info = spectator_v4.get_spectator_info_from_summoner_id(summoners[0])
@@ -75,7 +89,19 @@ def main(bot: Bot, message: Message):
         if info:
             break
     else:
-        smart_privmsg.send(bot, message, f"{twitch_user} is currently not in game. These are all of their summoners: {summoner_names}", reply=message.tags["id"])
+        smart_privmsg.send(
+            bot,
+            message,
+            f"{twitch_user} is currently not in game. These are all of their summoners: {summoner_names}",
+            reply=message.tags["id"],
+        )
+        conn.close()
         return
 
-    smart_privmsg.send(bot, message, f"{twitch_user} is currently playing a game on: {summoner_names[-1]}", reply=message.tags["id"])
+    smart_privmsg.send(
+        bot,
+        message,
+        f"{twitch_user} is currently playing a game on: {summoner_names[-1]}",
+        reply=message.tags["id"],
+    )
+    conn.close()

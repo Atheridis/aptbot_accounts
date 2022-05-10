@@ -90,6 +90,31 @@ def create_lol_database():
     )
     logger.info(f"created table accounts")
 
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS lol_queue (
+            twitch_id INTEGER NOT NULL,
+            position INTEGER NOT NULL UNIQUE,
+            available INTEGER NOT NULL,
+            last_available INTEGER,
+            time_remaining INTEGER NOT NULL,
+            PRIMARY KEY (twitch_id)
+        );
+        """
+    )
+    logger.info(f"created table lol_queue")
+
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS lol_queue_data (
+            name TEXT NOT NULL,
+            data INTEGER NOT NULL,
+            PRIMARY KEY (name)
+        );
+        """
+    )
+    logger.info(f"created table lol_queue_data")
+
     conn.commit()
     conn.close()
 

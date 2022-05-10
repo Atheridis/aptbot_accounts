@@ -6,6 +6,7 @@ import traceback
 import tools.raid
 import tools.smart_privmsg
 import tools.permissions
+import tools.smart_start_stream_time
 import analyze_command
 import scripts.unit_converter
 import scripts.alwase
@@ -19,6 +20,7 @@ from importlib import reload
 reload(tools.raid)
 reload(tools.smart_privmsg)
 reload(tools.permissions)
+reload(tools.smart_start_stream_time)
 reload(analyze_command)
 reload(scripts.unit_converter)
 reload(scripts.alwase)
@@ -31,7 +33,7 @@ logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
 
-file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
+file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
 file_handler.setFormatter(formatter)
 
 logger.handlers = []
@@ -51,41 +53,37 @@ auto_message_specs = {}
 auto_message_modules = {}
 
 commands = [
-    c for c in os.listdir(COMMANDS_PATH) if os.path.isfile(os.path.join(COMMANDS_PATH, c))
+    c
+    for c in os.listdir(COMMANDS_PATH)
+    if os.path.isfile(os.path.join(COMMANDS_PATH, c))
 ]
-commands = filter(lambda x: not x.startswith('.'), commands)
+commands = filter(lambda x: not x.startswith("."), commands)
 commands = filter(lambda x: os.path.splitext(x)[1] == ".py", commands)
 commands = list(commands)
 for command in commands:
-    commands_specs[command.split('.')[0]] = (
-        importlib.util.spec_from_file_location(
-            f"{command.split('.')[0]}",
-            os.path.join(COMMANDS_PATH, command)
-        )
+    commands_specs[command.split(".")[0]] = importlib.util.spec_from_file_location(
+        f"{command.split('.')[0]}", os.path.join(COMMANDS_PATH, command)
     )
 logger.info(f"List of commands: {commands}")
 
 auto_messages = [
-    c for c in os.listdir(AUTO_MESSAGES_PATH) if os.path.isfile(os.path.join(AUTO_MESSAGES_PATH, c))
+    c
+    for c in os.listdir(AUTO_MESSAGES_PATH)
+    if os.path.isfile(os.path.join(AUTO_MESSAGES_PATH, c))
 ]
-auto_messages = filter(lambda x: not x.startswith('.'), auto_messages)
-auto_messages = filter(
-    lambda x: os.path.splitext(x)[1] == ".py",
-    auto_messages
-)
+auto_messages = filter(lambda x: not x.startswith("."), auto_messages)
+auto_messages = filter(lambda x: os.path.splitext(x)[1] == ".py", auto_messages)
 auto_messages = list(auto_messages)
 for auto_message in auto_messages:
-    auto_message_specs[auto_message.split('.')[0]] = (
-        importlib.util.spec_from_file_location(
-            f"{auto_message.split('.')[0]}",
-            os.path.join(AUTO_MESSAGES_PATH, auto_message)
-        )
+    auto_message_specs[
+        auto_message.split(".")[0]
+    ] = importlib.util.spec_from_file_location(
+        f"{auto_message.split('.')[0]}", os.path.join(AUTO_MESSAGES_PATH, auto_message)
     )
 logger.info(f"List of auto_messages: {auto_messages}")
 
 for spec in commands_specs:
-    commands_modules[spec] = importlib.util.module_from_spec(
-        commands_specs[spec])
+    commands_modules[spec] = importlib.util.module_from_spec(commands_specs[spec])
     if not commands_specs[spec]:
         continue
     try:
@@ -96,7 +94,8 @@ for spec in commands_specs:
 
 for spec in auto_message_specs:
     auto_message_modules[spec] = importlib.util.module_from_spec(
-        auto_message_specs[spec])
+        auto_message_specs[spec]
+    )
     if not auto_message_specs[spec]:
         continue
     try:
@@ -111,12 +110,12 @@ database_manager.create_lol_database()
 database_manager.create_variables_db()
 database_manager.create_chat_history_database()
 database_manager.update_commands_in_database(commands_modules, commands)
-database_manager.update_auto_messages_in_database(
-    auto_message_modules, auto_messages)
+database_manager.update_auto_messages_in_database(auto_message_modules, auto_messages)
 
 
 def start(bot: Bot, message: Message):
     while True:
+        tools.smart_start_stream_time.update_start_stream_timestamp()
         analyze_auto_message.do_auto_message(bot, message, auto_message_modules)
         time.sleep(30)
 

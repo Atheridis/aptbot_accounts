@@ -15,7 +15,7 @@ logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
 
-file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
+file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
 file_handler.setFormatter(formatter)
 
 logger.handlers = []
@@ -26,12 +26,12 @@ logger.debug(f"analyze_auto_message PATH set to: {PATH}")
 
 
 def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
-    conn = sqlite3.connect(os.path.join(PATH, "database.db"))
-    c = conn.cursor()
-
     start_stream_ts = tools.smart_start_stream_time.start_stream_timestamp()
     if not start_stream_ts:
         return
+
+    conn = sqlite3.connect(os.path.join(PATH, "database.db"))
+    c = conn.cursor()
 
     c.execute(
         """
@@ -71,7 +71,7 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
                         WHERE
                             name = ?
                     """,
-                    (name, )
+                    (name,),
                 )
                 conn.commit()
                 continue
@@ -81,7 +81,7 @@ def do_auto_message(bot: Bot, message: Message, auto_message_modules: dict):
             (
                 int(time.time()),
                 name,
-            )
+            ),
         )
         conn.commit()
         break

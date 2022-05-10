@@ -1,11 +1,12 @@
 from lol_api import *
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
 
-file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
+file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
 file_handler.setFormatter(formatter)
 
 logger.handlers = []
@@ -18,11 +19,13 @@ class BannedChampion:
     champion_id: int
     team_id: int
 
+
 @dataclass
 class Perks:
     perk_ids: list[int]
     perk_style: int
     perk_sub_style: int
+
 
 @dataclass
 class CurrentGameParticipant:
@@ -36,6 +39,7 @@ class CurrentGameParticipant:
     spell1_id: int
     spell2_id: int
 
+
 @dataclass
 class GameInfo:
     game_id: int
@@ -46,9 +50,10 @@ class GameInfo:
     platform_id: str
     game_mode: str
     banned_champions: list[BannedChampion]
-    game_queue_config_id: int
+    game_queue_config_id: Optional[int]
     observers: str
     participants: list[CurrentGameParticipant]
+
 
 def get_spectator_info_from_summoner_id(summoner_id: str) -> Optional[GameInfo]:
     endpoint = f"/lol/spectator/v4/active-games/by-summoner/{summoner_id}"
@@ -60,10 +65,14 @@ def get_spectator_info_from_summoner_id(summoner_id: str) -> Optional[GameInfo]:
         headers=HEADER,
     )
     if r.status == 404:
-        logger.info(f"Summoner with summoner id: {summoner_id} wasn't found in game. Status code {r.status}")
+        logger.info(
+            f"Summoner with summoner id: {summoner_id} wasn't found in game. Status code {r.status}"
+        )
         return None
     if r.status != 200:
-        logger.warning(f"Couldn't retrieve summoner with summoner id: {summoner_id}. Status code {r.status}")
+        logger.warning(
+            f"Couldn't retrieve summoner with summoner id: {summoner_id}. Status code {r.status}"
+        )
         return None
     data = json.loads(r.data.decode("utf-8"))
 
@@ -82,7 +91,7 @@ def get_spectator_info_from_summoner_id(summoner_id: str) -> Optional[GameInfo]:
         perks = Perks(
             [perk_id for perk_id in participant["perks"]["perkIds"]],
             participant["perks"]["perkStyle"],
-            participant["perks"]["perkSubStyle"]
+            participant["perks"]["perkSubStyle"],
         )
         participants.append(
             CurrentGameParticipant(
@@ -107,7 +116,7 @@ def get_spectator_info_from_summoner_id(summoner_id: str) -> Optional[GameInfo]:
         data["platformId"],
         data["gameMode"],
         banned_champions,
-        data["gameQueueConfigId"],
+        data.get("gameQueueConfigId", None),
         data["observers"]["encryptionKey"],
         participants,
     )
