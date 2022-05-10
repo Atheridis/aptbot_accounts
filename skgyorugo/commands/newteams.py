@@ -16,11 +16,11 @@ file_handler.setFormatter(formatter)
 logger.handlers = []
 logger.addHandler(file_handler)
 
-PERMISSION = 99
-PREFIX = "?"
+PERMISSION = 10
+PREFIX = "\\"
 DESCRIPTION = r"Check who's currently in queue."
-USER_COOLDOWN = 30
-GLOBAL_COOLDOWN = 15
+USER_COOLDOWN = 0
+GLOBAL_COOLDOWN = 0
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 PATH = os.path.join(PATH, "..")
