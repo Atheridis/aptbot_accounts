@@ -3,7 +3,7 @@ import os
 import logging
 import ttv_api.users
 import sqlite3
-import tools.smart_privmsg
+import random
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -67,17 +67,21 @@ def main(bot: Bot, message: Message):
     try:
         queue_size = fetched[0]
     except TypeError:
-        queue_size = 5
+        queue_size = 10
         bot.send_privmsg(
             message.channel,
             f"There was an issue fetching the queue size, default set to {queue_size}",
             reply=message.tags["id"],
         )
 
-    tools.smart_privmsg.send(
-        bot,
-        message,
-        f"These people are to play with {message.channel}: {queue_names[1:queue_size]} | and these people are waiting: {queue_names[queue_size:]}",
+    queue = queue_names[:queue_size]
+    random.shuffle(queue)
+    blue_team = queue[: queue_size // 2]
+    red_team = queue[queue_size // 2 :]
+
+    bot.send_privmsg(
+        message.channel,
+        [f"Blue team is: {blue_team}", f"Red team is: {red_team}"],
         reply=message.tags["id"],
     )
 

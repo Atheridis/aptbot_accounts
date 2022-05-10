@@ -94,7 +94,7 @@ def create_lol_database():
         """
         CREATE TABLE IF NOT EXISTS lol_queue (
             twitch_id INTEGER NOT NULL,
-            position INTEGER NOT NULL UNIQUE,
+            position INTEGER NOT NULL,
             available INTEGER NOT NULL,
             last_available INTEGER,
             time_remaining INTEGER NOT NULL,
