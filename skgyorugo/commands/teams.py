@@ -51,6 +51,15 @@ def main(bot: Bot, message: Message):
             )
 
     users = [x[0] for x in fetched]
+    if not users:
+        bot.send_privmsg(
+            message.channel,
+            "No teams have been set yet.",
+            reply=message.tags["id"],
+        )
+        conn.close()
+        return
+
     twitch = ttv_api.users.get_users(user_ids=users)
     if not twitch:
         bot.send_privmsg(
@@ -65,7 +74,7 @@ def main(bot: Bot, message: Message):
     for twitch_user in twitch:
         if int(twitch_user.user_id) in blue_team:
             blue_team_users.append(twitch_user.display_name)
-        elif int( twitch_user.user_id ) in red_team:
+        elif int(twitch_user.user_id) in red_team:
             red_team_users.append(twitch_user.display_name)
         else:
             bot.send_privmsg(
