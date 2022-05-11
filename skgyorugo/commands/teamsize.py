@@ -16,7 +16,7 @@ logger.addHandler(file_handler)
 
 PERMISSION = 10
 PREFIX = "\\"
-DESCRIPTION = r"Change the queue size"
+DESCRIPTION = r"Change the team size"
 USER_COOLDOWN = 0
 GLOBAL_COOLDOWN = 0
 
@@ -53,7 +53,7 @@ def main(bot: Bot, message: Message):
 
     bot.send_privmsg(
         message.channel,
-        f"Successfully changed queue size to {queue_size}.",
+        f"Successfully changed team size to {queue_size}.",
         reply=message.tags["id"],
     )
 

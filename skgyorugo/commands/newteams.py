@@ -74,6 +74,13 @@ def main(bot: Bot, message: Message):
             reply=message.tags["id"],
         )
 
+    if len(queue_users) < queue_size:
+        bot.send_privmsg(
+            message.channel,
+            f"There aren't enough people in the queue. Current team size is {queue_size} while there are only {len(queue_users)} in queue.",
+            reply=message.tags["id"],
+        )
+
     queue_users: list[ttv_api.users.User] = queue_users[:queue_size]
     random.shuffle(queue_users)
     blue_team: list[ttv_api.users.User] = queue_users[: queue_size // 2]
