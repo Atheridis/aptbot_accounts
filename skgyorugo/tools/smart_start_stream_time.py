@@ -36,11 +36,13 @@ MAX_OFF_STREAM_MARGIN = 60 * 60
 
 def end_stream():
     logger.info("STREAM ENDED")
+    print("STREAM ENDED")
     clean_queue.clean_queue()
 
 
 def start_stream():
     logger.info("STREAM STARTED")
+    print("STREAM STARTED")
     clean_queue.clean_queue()
 
 
