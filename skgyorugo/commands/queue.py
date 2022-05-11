@@ -77,7 +77,7 @@ def main(bot: Bot, message: Message):
     tools.smart_privmsg.send(
         bot,
         message,
-        f"These people are to play with {message.channel}: {queue_names[1:queue_size]} | and these people are waiting: {queue_names[queue_size:]}",
+        f"These people are playing with {message.channel}: {queue_names[1:queue_size]} | and these people are waiting: {queue_names[queue_size:]}",
         reply=message.tags["id"],
     )
 

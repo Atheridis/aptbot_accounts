@@ -36,7 +36,7 @@ def main(bot: Bot, message: Message):
         """
     )
     fetched = c.fetchall()
-    queue = [x[0] for x in fetched]
+    queue: list[str] = [x[0] for x in fetched]
     twitch = ttv_api.users.get_users(user_ids=queue)
     if not twitch:
         bot.send_privmsg(
@@ -46,11 +46,11 @@ def main(bot: Bot, message: Message):
         )
         conn.close()
         return
-    queue_names = []
+    queue_users: list[ttv_api.users.User] = []
     for twitch_id in queue:
         for twitch_user in twitch:
             if int(twitch_user.user_id) == int(twitch_id):
-                queue_names.append(twitch_user.display_name)
+                queue_users.append(twitch_user)
                 break
         else:
             bot.send_privmsg(
@@ -74,14 +74,24 @@ def main(bot: Bot, message: Message):
             reply=message.tags["id"],
         )
 
-    queue = queue_names[:queue_size]
-    random.shuffle(queue)
-    blue_team = queue[: queue_size // 2]
-    red_team = queue[queue_size // 2 :]
+    queue_users: list[ttv_api.users.User] = queue_users[:queue_size]
+    random.shuffle(queue_users)
+    blue_team: list[ttv_api.users.User] = queue_users[: queue_size // 2]
+    red_team: list[ttv_api.users.User] = queue_users[queue_size // 2 :]
+
+    c.execute("UPDATE lol_queue SET team = NULL")
+    sql = f"UPDATE lol_queue SET team = 0 WHERE twitch_id IN ({(', ?' * (queue_size // 2))[2:]})"
+    c.execute(sql, tuple(user.user_id for user in blue_team))
+    sql = f"UPDATE lol_queue SET team = 1 WHERE twitch_id IN ({(', ?' * (queue_size - queue_size // 2))[2:]})"
+    c.execute(sql, tuple(user.user_id for user in red_team))
+    conn.commit()
+
+    blue_team_users: list[str] = [user.display_name for user in blue_team]
+    red_team_users: list[str] = [user.display_name for user in red_team]
 
     bot.send_privmsg(
         message.channel,
-        [f"Blue team is: {blue_team}", f"Red team is: {red_team}"],
+        [f"Blue team is: {blue_team_users}", f"Red team is: {red_team_users}"],
         reply=message.tags["id"],
     )
 
