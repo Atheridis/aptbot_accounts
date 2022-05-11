@@ -63,9 +63,9 @@ def main(bot: Bot, message: Message):
     blue_team_users = []
     red_team_users = []
     for twitch_user in twitch:
-        if twitch_user.user_id in blue_team:
+        if int(twitch_user.user_id) in blue_team:
             blue_team_users.append(twitch_user.display_name)
-        elif twitch_user.user_id in red_team:
+        elif int( twitch_user.user_id ) in red_team:
             red_team_users.append(twitch_user.display_name)
         else:
             bot.send_privmsg(
