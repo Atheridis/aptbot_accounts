@@ -168,7 +168,7 @@ def main(bot: Bot, message: Message):
                                 name = 'queuesize'
                         )
                     )
-            )
+            ),
             time_remaining = time_remaining - (? - last_available)
         WHERE 
             twitch_id = ?
