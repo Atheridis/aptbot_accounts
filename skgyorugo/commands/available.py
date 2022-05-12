@@ -143,14 +143,16 @@ def main(bot: Bot, message: Message):
                     ELSE 0
                 END
             ),
-            position = 1 + (
-                SELECT
-                    max(position)
-                FROM
-                    lol_queue
-                WHERE
-                    priority_queue = 1
-                    OR position <= (
+            position = (
+                CASE
+                    WHEN (
+                        SELECT
+                            position
+                        FROM
+                            lol_queue
+                        WHERE
+                            twitch_id = ?
+                    ) < (
                         SELECT
                             max(position)
                         FROM
@@ -168,6 +170,34 @@ def main(bot: Bot, message: Message):
                                 name = 'queuesize'
                         )
                     )
+                    THEN 1 + (
+                        SELECT
+                            max(position)
+                        FROM
+                            lol_queue
+                        WHERE
+                            priority_queue = 1
+                            OR position <= (
+                                SELECT
+                                    max(position)
+                                FROM
+                                    lol_queue
+                                WHERE
+                                    available = 1
+                                ORDER BY 
+                                    position
+                                LIMIT (
+                                    SELECT
+                                        data
+                                    FROM
+                                        lol_queue_data
+                                    WHERE
+                                        name = 'queuesize'
+                                )
+                            )
+                    )
+                    ELSE position
+                END
             ),
             time_remaining = time_remaining - (? - last_available)
         WHERE 
@@ -175,6 +205,7 @@ def main(bot: Bot, message: Message):
             AND available = 0;
         """,
         (
+            twitch_id,
             twitch_id,
             int(time.time()),
             twitch_id,
