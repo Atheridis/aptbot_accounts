@@ -32,7 +32,7 @@ def main(bot: Bot, message: Message):
 
     c.execute(
         """
-        SELECT twitch_id FROM lol_queue WHERE available = 1 ORDER BY position ASC;
+        SELECT twitch_id, priority_queue FROM lol_queue WHERE available = 1 ORDER BY position ASC;
         """
     )
     fetched = c.fetchall()
@@ -46,11 +46,11 @@ def main(bot: Bot, message: Message):
         )
         conn.close()
         return
-    queue_names = []
+    queue_users = []
     for twitch_id in queue:
         for twitch_user in twitch:
             if int(twitch_user.user_id) == int(twitch_id):
-                queue_names.append(twitch_user.display_name)
+                queue_users.append(twitch_user)
                 break
         else:
             bot.send_privmsg(
@@ -63,9 +63,8 @@ def main(bot: Bot, message: Message):
         SELECT data FROM lol_queue_data WHERE name = 'queuesize';
         """
     )
-    fetched = c.fetchone()
     try:
-        queue_size = fetched[0]
+        queue_size = c.fetchone()[0]
     except TypeError:
         queue_size = 5
         bot.send_privmsg(
@@ -74,10 +73,24 @@ def main(bot: Bot, message: Message):
             reply=message.tags["id"],
         )
 
+    play_list = [user.display_name for user in queue_users[1:queue_size]]
+    prio_queue = []
+    wait_list = []
+    for user in queue_users[queue_size:]:
+        for fetch in fetched:
+            if int(user.user_id) == fetch[0] and fetch[1] == 1:
+                prio_queue.append(user.display_name)
+            elif int(user.user_id) == fetch[0]:
+                wait_list.append(user.display_name)
+
+    if prio_queue:
+        msg = f"These people are playing with {message.channel}: {play_list} | These people are in Priority Queue: {prio_queue} | These people are in the Wait List: {wait_list}"
+    else:
+        msg = f"These people are playing with {message.channel}: {play_list} | These people are in the Wait List: {wait_list}"
     tools.smart_privmsg.send(
         bot,
         message,
-        f"These people are playing with {message.channel}: {queue_names[1:queue_size]} | and these people are waiting: {queue_names[queue_size:]}",
+        msg,
         reply=message.tags["id"],
     )
 
