@@ -63,4 +63,10 @@ def main(bot: Bot, message: Message):
     )
     conn.commit()
 
+    bot.send_privmsg(
+        message.channel,
+        f"Successfully cleaned the queue.",
+        reply=message.tags["id"],
+    )
+
     conn.close()

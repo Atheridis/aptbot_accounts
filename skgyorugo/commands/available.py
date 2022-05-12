@@ -43,8 +43,34 @@ def main(bot: Bot, message: Message):
         """
         UPDATE
             lol_queue
+        SET
+            position = position + 1
+        WHERE
+            position >= (
+                SELECT
+                    data
+                FROM 
+                    lol_queue_data
+                WHERE
+                    name = 'queuesize'
+            )
+        """
+    )
+
+    c.execute(
+        """
+        UPDATE
+            lol_queue
         SET 
             available = 1,
+            position = (
+                SELECT
+                    data
+                FROM
+                    lol_queue_data
+                WHERE
+                    name = 'queuesize'
+            )
             time_remaining = time_remaining - (? - last_available)
         WHERE 
             twitch_id = ?
