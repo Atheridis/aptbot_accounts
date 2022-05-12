@@ -73,7 +73,7 @@ def main(bot: Bot, message: Message):
                     lol_queue_data
                 WHERE
                     name = 'queuesize'
-            )
+            ),
             time_remaining = time_remaining - (? - last_available)
         WHERE 
             twitch_id = ?
