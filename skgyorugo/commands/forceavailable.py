@@ -156,7 +156,7 @@ def main(bot: Bot, message: Message):
                         )
                     )
                     THEN 1
-                    ELSE 0
+                    ELSE null
                 END
             ),
             position = (
