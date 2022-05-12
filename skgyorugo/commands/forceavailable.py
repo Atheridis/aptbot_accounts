@@ -59,19 +59,23 @@ def main(bot: Bot, message: Message):
                     ) < (
                         SELECT
                             max(position)
-                        FROM
-                            lol_queue
-                        WHERE
-                            available = 1
-                        ORDER BY 
-                            position
-                        LIMIT (
+                        FROM (
                             SELECT
-                                data
+                                position
                             FROM
-                                lol_queue_data
+                                lol_queue
                             WHERE
-                                name = 'queuesize'
+                                available = 1
+                            ORDER BY
+                                position
+                            LIMIT (
+                                SELECT
+                                    data
+                                FROM
+                                    lol_queue_data
+                                WHERE
+                                    name = 'queuesize'
+                            )
                         )
                     )
                     THEN position + 1
@@ -89,20 +93,25 @@ def main(bot: Bot, message: Message):
                     OR position <= (
                         SELECT
                             max(position)
-                        FROM
-                            lol_queue
-                        WHERE
-                            available = 1
-                        ORDER BY 
-                            position
-                        LIMIT (
+                        FROM (
                             SELECT
-                                data
+                                position
                             FROM
-                                lol_queue_data
+                                lol_queue
                             WHERE
-                                name = 'queuesize'
+                                available = 1
+                            ORDER BY 
+                                position
+                            LIMIT (
+                                SELECT
+                                    data
+                                FROM
+                                    lol_queue_data
+                                WHERE
+                                    name = 'queuesize'
+                            )
                         )
+                            
                     )
             );
         """,
@@ -127,19 +136,23 @@ def main(bot: Bot, message: Message):
                     ) < (
                         SELECT
                             max(position)
-                        FROM
-                            lol_queue
-                        WHERE
-                            available = 1
-                        ORDER BY 
-                            position
-                        LIMIT (
+                        FROM (
                             SELECT
-                                data
+                                position
                             FROM
-                                lol_queue_data
+                                lol_queue
                             WHERE
-                                name = 'queuesize'
+                                available = 1
+                            ORDER BY 
+                                position
+                            LIMIT (
+                                SELECT
+                                    data
+                                FROM
+                                    lol_queue_data
+                                WHERE
+                                    name = 'queuesize'
+                            )
                         )
                     )
                     THEN 1
@@ -158,19 +171,23 @@ def main(bot: Bot, message: Message):
                     ) < (
                         SELECT
                             max(position)
-                        FROM
-                            lol_queue
-                        WHERE
-                            available = 1
-                        ORDER BY 
-                            position
-                        LIMIT (
+                        FROM (
                             SELECT
-                                data
+                                position
                             FROM
-                                lol_queue_data
+                                lol_queue
                             WHERE
-                                name = 'queuesize'
+                                available = 1
+                            ORDER BY 
+                                position
+                            LIMIT (
+                                SELECT
+                                    data
+                                FROM
+                                    lol_queue_data
+                                WHERE
+                                    name = 'queuesize'
+                            )
                         )
                     )
                     THEN 1 + (
@@ -183,19 +200,23 @@ def main(bot: Bot, message: Message):
                             OR position <= (
                                 SELECT
                                     max(position)
-                                FROM
-                                    lol_queue
-                                WHERE
-                                    available = 1
-                                ORDER BY 
-                                    position
-                                LIMIT (
+                                FROM (
                                     SELECT
-                                        data
+                                        position
                                     FROM
-                                        lol_queue_data
+                                        lol_queue
                                     WHERE
-                                        name = 'queuesize'
+                                        available = 1
+                                    ORDER BY 
+                                        position
+                                    LIMIT (
+                                        SELECT
+                                            data
+                                        FROM
+                                            lol_queue_data
+                                        WHERE
+                                            name = 'queuesize'
+                                    )
                                 )
                             )
                     )
