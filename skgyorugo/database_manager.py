@@ -99,6 +99,7 @@ def create_lol_database():
             last_available INTEGER,
             time_remaining INTEGER NOT NULL,
             team INTEGER,
+            priority_queue INTEGER,
             PRIMARY KEY (twitch_id)
         );
         """

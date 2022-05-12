@@ -44,7 +44,7 @@ def main(bot: Bot, message: Message):
 
     c.execute(
         """
-        UPDATE lol_queue SET available = 0, last_available = ? WHERE twitch_id = ?;
+        UPDATE lol_queue SET available = 0, priority_queue = null, last_available = ? WHERE twitch_id = ?;
         """,
         (
             int(time.time()),

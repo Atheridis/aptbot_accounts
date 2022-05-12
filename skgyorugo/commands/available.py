@@ -44,16 +44,64 @@ def main(bot: Bot, message: Message):
         UPDATE
             lol_queue
         SET
-            position = position + 1
-        WHERE
-            position >= (
-                SELECT
-                    data
-                FROM 
-                    lol_queue_data
-                WHERE
-                    name = 'queuesize'
+            position = (
+                CASE
+                    WHEN (
+                        SELECT
+                            position
+                        FROM
+                            lol_queue
+                        WHERE
+                            twitch_id = ?
+                    ) < (
+                        SELECT
+                            max(position)
+                        FROM
+                            lol_queue
+                        WHERE
+                            available = 1
+                        ORDER BY 
+                            position
+                        LIMIT (
+                            SELECT
+                                data
+                            FROM
+                                lol_queue_data
+                            WHERE
+                                name = 'queuesize'
+                        )
+                    )
+                    THEN position + 1
+                    ELSE position
+                END
             )
+        WHERE
+            position > (
+                SELECT
+                    max(position)
+                FROM
+                    lol_queue
+                WHERE
+                    priority_queue = 1
+                    OR position <= (
+                        SELECT
+                            max(position)
+                        FROM
+                            lol_queue
+                        WHERE
+                            available = 1
+                        ORDER BY 
+                            position
+                        LIMIT (
+                            SELECT
+                                data
+                            FROM
+                                lol_queue_data
+                            WHERE
+                                name = 'queuesize'
+                        )
+                    )
+            );
         """
     )
 
@@ -63,14 +111,63 @@ def main(bot: Bot, message: Message):
             lol_queue
         SET 
             available = 1,
-            position = (
-                SELECT
-                    data
-                FROM
-                    lol_queue_data
-                WHERE
-                    name = 'queuesize'
+            priority_queue = (
+                CASE
+                    WHEN (
+                        SELECT
+                            position
+                        FROM
+                            lol_queue
+                        WHERE
+                            twitch_id = ?
+                    ) < (
+                        SELECT
+                            max(position)
+                        FROM
+                            lol_queue
+                        WHERE
+                            available = 1
+                        ORDER BY 
+                            position
+                        LIMIT (
+                            SELECT
+                                data
+                            FROM
+                                lol_queue_data
+                            WHERE
+                                name = 'queuesize'
+                        )
+                    )
+                    THEN 1
+                    ELSE 0
+                END
             ),
+            position = 1 + (
+                SELECT
+                    max(position)
+                FROM
+                    lol_queue
+                WHERE
+                    priority_queue = 1
+                    OR position <= (
+                        SELECT
+                            max(position)
+                        FROM
+                            lol_queue
+                        WHERE
+                            available = 1
+                        ORDER BY 
+                            position
+                        LIMIT (
+                            SELECT
+                                data
+                            FROM
+                                lol_queue_data
+                            WHERE
+                                name = 'queuesize'
+                        )
+                    )
+            )
             time_remaining = time_remaining - (? - last_available)
         WHERE 
             twitch_id = ?
