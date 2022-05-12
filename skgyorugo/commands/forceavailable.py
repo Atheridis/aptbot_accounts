@@ -105,7 +105,8 @@ def main(bot: Bot, message: Message):
                         )
                     )
             );
-        """
+        """,
+        (twitch_id,),
     )
 
     c.execute(
@@ -177,6 +178,7 @@ def main(bot: Bot, message: Message):
             AND available = 0;
         """,
         (
+            twitch_id,
             int(time.time()),
             twitch_id,
         ),
