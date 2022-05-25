@@ -114,10 +114,19 @@ database_manager.update_auto_messages_in_database(auto_message_modules, auto_mes
 
 
 def start(bot: Bot, message: Message):
+    i = 0
+    wait = 5
     while True:
-        tools.smart_start_stream_time.update_start_stream_timestamp()
-        analyze_auto_message.do_auto_message(bot, message, auto_message_modules)
-        time.sleep(30)
+        i += wait
+        started = tools.smart_start_stream_time.update_start_stream_timestamp()
+        if started == "START":
+            bot.send_privmsg(message.channel, "Stream has started, you can now use ?join")
+        elif started == "END":
+            bot.send_privmsg(message.channel, "Stream has ended")
+        if i >= 30:
+            analyze_auto_message.do_auto_message(bot, message, auto_message_modules)
+            i = 0
+        time.sleep(wait)
 
 
 def main(bot: Bot, message: Message):

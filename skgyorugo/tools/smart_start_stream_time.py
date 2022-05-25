@@ -70,7 +70,7 @@ def start_stream_timestamp() -> Optional[int]:
         return None
 
 
-def update_start_stream_timestamp() -> Optional[int]:
+def update_start_stream_timestamp() -> Optional[str]:
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
 
@@ -100,7 +100,7 @@ def update_start_stream_timestamp() -> Optional[int]:
         if time.time() < last_checked + CHECK_STREAMTIME_CD:
             logger.info(f"returned cached start stream time: {start_stream_ts}")
             conn.close()
-            return start_stream_ts
+            return 
 
     stream_info = ttv_api.stream.get_streams(user_logins=[streamer_login])
     logger.info(f"used twitch api to get stream info")
@@ -133,7 +133,7 @@ def update_start_stream_timestamp() -> Optional[int]:
         conn.close()
         # TODO add hook, streamer ended stream
         end_stream()
-        return
+        return "END"
 
     if not fetched:
         start_stream_ts = int(stream_info[0].started_at.timestamp())
@@ -154,7 +154,7 @@ def update_start_stream_timestamp() -> Optional[int]:
         logger.info(f"returned api start stream time: {start_stream_ts}")
         # TODO add hook, streamer started streaming
         start_stream()
-        return start_stream_ts
+        return "START"
 
     start_stream_ts, last_checked = fetched
     current_time = int(time.time())
@@ -172,4 +172,4 @@ def update_start_stream_timestamp() -> Optional[int]:
     )
     conn.close()
     logger.info(f"returned cached start stream time: {start_stream_ts}")
-    return start_stream_ts
+    return 
