@@ -4,6 +4,7 @@ import logging
 import ttv_api.users
 import sqlite3
 import tools.smart_privmsg
+import random
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -27,6 +28,28 @@ PATH = os.path.join(PATH, "..")
 
 
 def main(bot: Bot, message: Message):
+    if random.random() < 0.09:
+        q = [
+            "https://imgur.com/d5qGioI",
+            "https://imgur.com/oaMmxXI",
+            "https://imgur.com/4btWipx",
+            "https://imgur.com/VvvD8d8",
+            "https://imgur.com/v7oflTv",
+            "https://imgur.com/MSnBNDz",
+            "https://imgur.com/x2pPkvw",
+            "https://imgur.com/xZgFcYG",
+        ]
+        msg = (
+            "You wanted to see the queue, but instead you got visited by the Q. monkaW "
+        )
+        msg += random.choice(q)
+        tools.smart_privmsg.send(
+            bot,
+            message,
+            msg,
+            reply=message.tags["id"],
+        )
+        return
     conn = sqlite3.connect(os.path.join(PATH, "lol_data.db"))
     c = conn.cursor()
 
