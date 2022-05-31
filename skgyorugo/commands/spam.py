@@ -2,7 +2,7 @@ from aptbot.bot import Message, Commands, Bot
 import tools.smart_privmsg
 
 PERMISSION = 99
-PREFIX = '?'
+PREFIX = "?"
 DESCRIPTION = ""
 USER_COOLDOWN = 30
 GLOBAL_COOLDOWN = 15
@@ -18,7 +18,7 @@ def main(bot: Bot, message: Message):
     if replied_message:
         msg = replied_message
     else:
-        msg = ' '.join(message.value.split(' ')[1:])
+        msg = " ".join(message.value.split(" ")[1:])
     new_msg = ""
     while len(new_msg) + len(msg) < MAX_LENGTH:
         new_msg += msg + " "

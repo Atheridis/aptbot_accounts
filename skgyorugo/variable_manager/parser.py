@@ -31,11 +31,7 @@ class Expression:
                     AND list_values.id = ?
                     AND methods.name = ?
                 """,
-                (
-                    self.name,
-                    self.list_id,
-                    self.method
-                )
+                (self.name, self.list_id, self.method),
             )
         conn.close()
         pass

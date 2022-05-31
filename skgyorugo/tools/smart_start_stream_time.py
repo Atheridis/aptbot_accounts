@@ -9,15 +9,6 @@ from scripts import clean_queue
 from typing import Optional
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
-
-file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
-file_handler.setFormatter(formatter)
-
-logger.handlers = []
-logger.addHandler(file_handler)
 
 STREAMER_PATH = os.path.abspath(os.path.join(__file__, "../.."))
 logger.debug(f"STREAMER_PATH set to: {STREAMER_PATH}")
@@ -100,7 +91,7 @@ def update_start_stream_timestamp() -> Optional[str]:
         if time.time() < last_checked + CHECK_STREAMTIME_CD:
             logger.info(f"returned cached start stream time: {start_stream_ts}")
             conn.close()
-            return 
+            return
 
     stream_info = ttv_api.stream.get_streams(user_logins=[streamer_login])
     logger.info(f"used twitch api to get stream info")
@@ -172,4 +163,4 @@ def update_start_stream_timestamp() -> Optional[str]:
     )
     conn.close()
     logger.info(f"returned cached start stream time: {start_stream_ts}")
-    return 
+    return

@@ -10,8 +10,12 @@ class Video:
 
 def get_newest_video(channel_id: str) -> Optional[Video]:
     get_video_snippets = "?part=snippet"
-    get_url = URL + get_video_snippets + \
-        f"&channelId={channel_id}&order=date&type=video" + f"&key={API}"
+    get_url = (
+        URL
+        + get_video_snippets
+        + f"&channelId={channel_id}&order=date&type=video"
+        + f"&key={API}"
+    )
 
     http = urllib3.PoolManager()
     r = http.request(

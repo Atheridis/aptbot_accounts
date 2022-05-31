@@ -3,7 +3,7 @@ import sqlite3
 import os
 
 PERMISSION = 10
-PREFIX = '\\'
+PREFIX = "\\"
 DESCRIPTION = ""
 USER_COOLDOWN = 0
 GLOBAL_COOLDOWN = 0
@@ -14,15 +14,15 @@ PATH = os.path.join(COMMANDS_PATH, "..")
 
 
 def main(bot: Bot, message: Message):
-    msg = ' '.join(message.value.split(' ')[1:])
-    command = msg.split(' ')[0]
+    msg = " ".join(message.value.split(" ")[1:])
+    command = msg.split(" ")[0]
     command_prefix = command[0]
     command_name = command[1:]
-    command_value = msg = ' '.join(msg.split(' ')[1:])
-    if command_prefix != '?':
+    command_value = msg = " ".join(msg.split(" ")[1:])
+    if command_prefix != "?":
         bot.send_privmsg(
             message.channel,
-            f"{message.nick} you cannot use {command_prefix} as a prefix"
+            f"{message.nick} you cannot use {command_prefix} as a prefix",
         )
         return
 
@@ -33,12 +33,12 @@ def main(bot: Bot, message: Message):
         (
             command_name,
             command_prefix,
-        )
+        ),
     )
     if not c.fetchone()[0]:
         bot.send_privmsg(
             message.channel,
-            f"The command {command_prefix}{command_name} cannot be edited"
+            f"The command {command_prefix}{command_name} cannot be edited",
         )
         return
 
@@ -48,17 +48,11 @@ def main(bot: Bot, message: Message):
             (
                 command_value,
                 command_name,
-            )
+            ),
         )
     except sqlite3.IntegrityError:
-        bot.send_privmsg(
-            message.channel,
-            f"The command {command_name} doesn't exist."
-        )
+        bot.send_privmsg(message.channel, f"The command {command_name} doesn't exist.")
     else:
-        bot.send_privmsg(
-            message.channel,
-            f"Successfully updated {command_name}."
-        )
+        bot.send_privmsg(message.channel, f"Successfully updated {command_name}.")
     conn.commit()
     conn.close()

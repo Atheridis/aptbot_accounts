@@ -10,10 +10,10 @@ def chatting(bot: Bot, message: Message):
         return
     msg = ""
     if "reply-parent-msg-body" in message.tags:
-        if message.value.split(' ')[1] == "Chatting":
-            msg = ' '.join(message.value.split(' ')[1:])
+        if message.value.split(" ")[1] == "Chatting":
+            msg = " ".join(message.value.split(" ")[1:])
     else:
-        if message.value.split(' ')[0] == "Chatting":
+        if message.value.split(" ")[0] == "Chatting":
             msg = message.value
     if msg:
         tools.smart_privmsg.send(bot, message, msg)

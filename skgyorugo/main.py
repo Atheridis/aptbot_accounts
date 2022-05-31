@@ -29,15 +29,6 @@ reload(database_manager)
 reload(analyze_auto_message)
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
-
-file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
-file_handler.setFormatter(formatter)
-
-logger.handlers = []
-logger.addHandler(file_handler)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 logger.info(f"PATH set to: {PATH}")
@@ -120,7 +111,9 @@ def start(bot: Bot, message: Message):
         i += wait
         started = tools.smart_start_stream_time.update_start_stream_timestamp()
         if started == "START":
-            bot.send_privmsg(message.channel, "Stream has started, you can now use ?join")
+            bot.send_privmsg(
+                message.channel, "Stream has started, you can now use ?join"
+            )
         elif started == "END":
             bot.send_privmsg(message.channel, "Stream has ended")
         if i >= 30:

@@ -7,15 +7,6 @@ import logging
 from aptbot.bot import Bot, Message, Commands
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
-
-file_handler = logging.FileHandler('/var/log/aptbot/logs.log')
-file_handler.setFormatter(formatter)
-
-logger.handlers = []
-logger.addHandler(file_handler)
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 logger.debug(f"PATH set to: {PATH}")
@@ -33,9 +24,9 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
         replied_message = None
 
     if replied_message:
-        command = message.value.split(' ')[1]
+        command = message.value.split(" ")[1]
     else:
-        command = message.value.split(' ')[0]
+        command = message.value.split(" ")[0]
     prefix = command[0]
     command = command[1:]
     user_id = message.tags["user-id"]
@@ -77,23 +68,26 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
             command,
             prefix,
             user_perm,
-        )
+        ),
     )
     fetched = c.fetchall()
     if not fetched:
         conn.close()
         return
 
-    (_, value,
-     command_user_cooldown,
-     command_global_cooldown,
-     avail_time) = random.choice(fetched)
+    (
+        _,
+        value,
+        command_user_cooldown,
+        command_global_cooldown,
+        avail_time,
+    ) = random.choice(fetched)
 
     if message_timestamp < avail_time:
         bot.send_privmsg(
             message.channel,
             f"The command '{prefix}{command}' is on cooldown. \
-            Please wait {int(avail_time - message_timestamp) + 1} seconds."
+            Please wait {int(avail_time - message_timestamp) + 1} seconds.",
         )
         conn.close()
         return
@@ -104,14 +98,14 @@ def do_command(bot: Bot, message: Message, command_modules: dict):
             user_id,
             command,
             command_user_cooldown + message_timestamp,
-        )
+        ),
     )
     c.execute(
         "UPDATE commands SET last_used = ? WHERE command = ?",
         (
             message_timestamp,
             command,
-        )
+        ),
     )
     conn.commit()
     conn.close()

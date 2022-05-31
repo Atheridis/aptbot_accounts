@@ -1,7 +1,7 @@
 from aptbot.bot import Message, Commands, Bot
 
 PERMISSION = 99
-PREFIX = '?'
+PREFIX = "?"
 DESCRIPTION = ""
 USER_COOLDOWN = 10
 GLOBAL_COOLDOWN = 10

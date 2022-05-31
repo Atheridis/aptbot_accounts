@@ -35,12 +35,12 @@ def _tometric(text: str) -> tuple[list[tuple[int, int]], list[float]]:
     found_single = False
     for w in doc:
         # print(w.text, w.pos_)
-        if w.pos_ in {'AUX', 'VERB', 'ADP'}:
+        if w.pos_ in {"AUX", "VERB", "ADP"}:
             if feet_was_last and not next_should_be_double:
                 ft_inch.append((feet, 0.0))
                 feet = 0
                 inches = 0
-        if w.like_num or w.pos_ == 'NUM':
+        if w.like_num or w.pos_ == "NUM":
             # index_of_previous_token = w.i - 1
             # try:
             #     prev_token = doc[index_of_previous_token]
@@ -70,11 +70,11 @@ def _tometric(text: str) -> tuple[list[tuple[int, int]], list[float]]:
                         ft_inch.append((feet, 0.0))
                     feet = float(w.text)
                     feet_was_last = True
-                elif next_token.lemma_ in {"inch", "\""}:
-                    if next_token.lemma_ == "\"" and next_should_be_double:
+                elif next_token.lemma_ in {"inch", '"'}:
+                    if next_token.lemma_ == '"' and next_should_be_double:
                         inches = float(w.text)
                         next_should_be_double = False
-                    elif next_token.lemma_ == "\"":
+                    elif next_token.lemma_ == '"':
                         inches = 0
                     elif next_should_be_double:
                         feet = 0

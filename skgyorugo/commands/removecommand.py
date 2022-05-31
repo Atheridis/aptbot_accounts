@@ -3,7 +3,7 @@ import sqlite3
 import os
 
 PERMISSION = 10
-PREFIX = '\\'
+PREFIX = "\\"
 DESCRIPTION = ""
 USER_COOLDOWN = 0
 GLOBAL_COOLDOWN = 0
@@ -13,19 +13,14 @@ PATH = os.path.join(COMMANDS_PATH, "..")
 
 
 def main(bot: Bot, message: Message):
-    msg = ' '.join(message.value.split(' ')[1:])
-    command = msg.split(' ')[0]
+    msg = " ".join(message.value.split(" ")[1:])
+    command = msg.split(" ")[0]
     command_prefix = command[0]
     command_name = command[1:]
 
     conn = sqlite3.connect(os.path.join(PATH, "database.db"))
     c = conn.cursor()
-    c.execute(
-        "SELECT value FROM command_values WHERE command = ?",
-        (
-            command_name,
-        )
-    )
+    c.execute("SELECT value FROM command_values WHERE command = ?", (command_name,))
     command_path = os.path.join(COMMANDS_PATH, f"{command_name}.py")
     hidden_command_path = os.path.join(COMMANDS_PATH, f".{command_name}.py")
     try:
@@ -43,17 +38,11 @@ def main(bot: Bot, message: Message):
             (
                 command_name,
                 command_prefix,
-            )
+            ),
         )
     except sqlite3.IntegrityError:
-        bot.send_privmsg(
-            message.channel,
-            f"The command {command_name} doesn't exist."
-        )
+        bot.send_privmsg(message.channel, f"The command {command_name} doesn't exist.")
     else:
-        bot.send_privmsg(
-            message.channel,
-            f"Successfully removed {command_name}."
-        )
+        bot.send_privmsg(message.channel, f"Successfully removed {command_name}.")
     conn.commit()
     conn.close()

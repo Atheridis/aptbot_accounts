@@ -3,7 +3,7 @@ import tools.smart_privmsg
 import urllib3
 
 PERMISSION = 99
-PREFIX = '?'
+PREFIX = "?"
 DESCRIPTION = ""
 USER_COOLDOWN = 90
 GLOBAL_COOLDOWN = 60
@@ -25,7 +25,7 @@ def main(bot: Bot, message: Message):
             message.channel,
             "NotLikeThis oopsie woopsie, we've made a fucky wucky. We can't \
             get the emotes at the moment. Hopefuwwy UwU wiww wait patientwy \
-            tiww we get thiws pwobwem sowted. OwO"
+            tiww we get thiws pwobwem sowted. OwO",
         )
         return
     emotes = r1.data.decode("utf-8")

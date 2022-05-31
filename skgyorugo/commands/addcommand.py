@@ -3,7 +3,7 @@ import sqlite3
 import os
 
 PERMISSION = 10
-PREFIX = '\\'
+PREFIX = "\\"
 DESCRIPTION = ""
 USER_COOLDOWN = 0
 GLOBAL_COOLDOWN = 0
@@ -19,15 +19,15 @@ DEFAULT_LAST_USED = 0
 
 
 def main(bot: Bot, message: Message):
-    msg = ' '.join(message.value.split(' ')[1:])
-    command = msg.split(' ')[0]
+    msg = " ".join(message.value.split(" ")[1:])
+    command = msg.split(" ")[0]
     command_prefix = command[0]
     command_name = command[1:]
-    command_value = msg = ' '.join(msg.split(' ')[1:])
-    if command_prefix != '?':
+    command_value = msg = " ".join(msg.split(" ")[1:])
+    if command_prefix != "?":
         bot.send_privmsg(
             message.channel,
-            f"{message.nick} you cannot use {command_prefix} as a prefix"
+            f"{message.nick} you cannot use {command_prefix} as a prefix",
         )
         return
 
@@ -38,13 +38,13 @@ def main(bot: Bot, message: Message):
         (
             command_name,
             command_prefix,
-        )
+        ),
     )
     try:
         if not c.fetchone()[0]:
             bot.send_privmsg(
                 message.channel,
-                f"The command {command_prefix}{command_name} already exists"
+                f"The command {command_prefix}{command_name} already exists",
             )
             return
     except TypeError:
@@ -60,15 +60,12 @@ def main(bot: Bot, message: Message):
                 DEFAULT_USER_COOLDOWN,
                 DEFAULT_GLOBAL_COOLDOWN,
                 DEFAULT_LAST_USED,
-            )
+            ),
         )
     except sqlite3.IntegrityError:
         pass
     except Exception as e:
-        bot.send_privmsg(
-            message.channel,
-            f"There was an error adding the command: {e}"
-        )
+        bot.send_privmsg(message.channel, f"There was an error adding the command: {e}")
         conn.close()
         return
     c.execute(
@@ -76,11 +73,8 @@ def main(bot: Bot, message: Message):
         (
             command_name,
             command_value,
-        )
+        ),
     )
-    bot.send_privmsg(
-        message.channel,
-        f"Successfully added {command_name}."
-    )
+    bot.send_privmsg(message.channel, f"Successfully added {command_name}.")
     conn.commit()
     conn.close()

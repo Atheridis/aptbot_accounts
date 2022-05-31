@@ -11,15 +11,6 @@ STREAMER_PATH = os.path.abspath(os.path.join(__file__, "../.."))
 streamer_login = os.path.split(STREAMER_PATH)[1]
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s: %(name)s; %(message)s")
-
-file_handler = logging.FileHandler("/var/log/aptbot/logs.log")
-file_handler.setFormatter(formatter)
-
-logger.handlers = []
-logger.addHandler(file_handler)
 
 
 def clean_queue():
