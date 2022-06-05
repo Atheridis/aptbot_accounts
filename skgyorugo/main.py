@@ -1,32 +1,34 @@
-from aptbot.bot import Bot, Message, Commands
-import os
 import importlib
 import importlib.util
-import traceback
-import tools.raid
-import tools.smart_privmsg
-import tools.permissions
-import tools.smart_start_stream_time
-import analyze_command
-import scripts.unit_converter
-import scripts.alwase
-import scripts.chatting
-import database_manager
-import analyze_auto_message
-import time
 import logging
+import os
+import time
+import traceback
 from importlib import reload
 
-reload(tools.raid)
-reload(tools.smart_privmsg)
-reload(tools.permissions)
-reload(tools.smart_start_stream_time)
+from aptbot.bot import Bot, Commands, Message
+
+import analyze_auto_message
+import analyze_command
+import database_manager
+import scripts.alwase
+import scripts.chatting
+import scripts.unit_converter
+import tools.permissions
+import tools.raid
+import tools.smart_privmsg
+import tools.smart_start_stream_time
+
+reload(analyze_auto_message)
 reload(analyze_command)
-reload(scripts.unit_converter)
+reload(database_manager)
 reload(scripts.alwase)
 reload(scripts.chatting)
-reload(database_manager)
-reload(analyze_auto_message)
+reload(scripts.unit_converter)
+reload(tools.permissions)
+reload(tools.raid)
+reload(tools.smart_privmsg)
+reload(tools.smart_start_stream_time)
 
 logger = logging.getLogger(__name__)
 
