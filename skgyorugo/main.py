@@ -1,4 +1,4 @@
-from aptbot.bot import Bot, Message, Commands
+from aptbot import Bot, Message, Commands
 import os
 import importlib
 import importlib.util
@@ -15,6 +15,7 @@ import database_manager
 import analyze_auto_message
 import time
 import logging
+from threading import Event
 from importlib import reload
 
 reload(tools.raid)
@@ -104,10 +105,10 @@ database_manager.update_commands_in_database(commands_modules, commands)
 database_manager.update_auto_messages_in_database(auto_message_modules, auto_messages)
 
 
-def start(bot: Bot, message: Message):
+def start(bot: Bot, message: Message, stop_event: Event):
     i = 0
     wait = 5
-    while True:
+    while not stop_event.is_set():
         i += wait
         started = tools.smart_start_stream_time.update_start_stream_timestamp()
         if started == "START":
