@@ -254,17 +254,7 @@ def update_commands_in_database(modules, commands):
                 command_last_used,
             ),
         )
-        logger.info(f"updating commands command_name: {command_name}")
-        logger.debug(f"updating commands command_prefix: {command_prefix}")
-        logger.debug(f"updating commands command_permission: {command_permission}")
-        logger.debug(f"updating commands command_description: {command_description}")
-        logger.debug(
-            f"updating commands command_user_cooldown: {command_user_cooldown}"
-        )
-        logger.debug(
-            f"updating commands command_global_cooldown: {command_global_cooldown}"
-        )
-        logger.debug(f"updating commands command_last_used: {command_last_used}")
+        logger.info(f"updating commands command_name: {command_prefix}{command_name}")
     conn.commit()
     conn.close()
 
