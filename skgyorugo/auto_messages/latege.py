@@ -26,5 +26,5 @@ def main(bot: Bot, message: Message):
         msg = f"Amazing!!! {message.channel} is EXACTLY on time today POGGERS"
     else:
         msg = f"UNBELIEVABLE!!!!! {message.channel} is EARLY by {-latege_amount} seconds!!!!\
-        This has NEVER happened before POGGERS"
+        Something very wrong is going on in this world monkaW"
     bot.send_privmsg(message.channel, "/announce " + msg)
