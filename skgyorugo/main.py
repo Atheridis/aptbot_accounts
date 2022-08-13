@@ -113,7 +113,7 @@ def start(bot: Bot, message: Message, stop_event: Event):
         started = tools.smart_start_stream_time.update_start_stream_timestamp()
         if started == "START":
             bot.send_privmsg(
-                message.channel, "Stream has started, you can now use ?join"
+                message.channel, "/announce Stream has started, you can now use ?join"
             )
         elif started == "END":
             bot.send_privmsg(message.channel, "Stream has ended")

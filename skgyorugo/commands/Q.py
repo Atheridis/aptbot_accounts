@@ -19,7 +19,7 @@ PATH = os.path.join(PATH, "..")
 
 
 def main(bot: Bot, message: Message):
-    if random.random() < 0.09:
+    if random.random() < 0.02:
         q = [
             "https://imgur.com/d5qGioI",
             "https://imgur.com/oaMmxXI",
@@ -98,9 +98,9 @@ def main(bot: Bot, message: Message):
                 wait_list.append(user.display_name)
 
     if prio_queue:
-        msg = f"These people are playing with {message.channel}: {play_list} | These people are in Priority Queue: {prio_queue} | These people are in the Wait List: {wait_list}"
+        msg = f"These people are playing with {message.channel}: {play_list} | These people are in Priority Queue: {prio_queue} | These people are in the Wait List: {wait_list}."
     else:
-        msg = f"These people are playing with {message.channel}: {play_list} | These people are in the Wait List: {wait_list}"
+        msg = f"These people are playing with {message.channel}: {play_list} | These people are in the Wait List: {wait_list}."
     tools.smart_privmsg.send(
         bot,
         message,

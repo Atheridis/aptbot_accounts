@@ -20,6 +20,7 @@ def main(bot: Bot, message: Message):
         return
 
     data = json.loads(r.data.decode("utf-8"))
+    joke = data["joke"].replace("\r\n", " ")
     tools.smart_privmsg.send(
-        bot, message, f"{data['joke']} ||| Get more jokes by typing ?joke"
+        bot, message, f"{joke} ||| Get more jokes by typing ?joke"
     )
